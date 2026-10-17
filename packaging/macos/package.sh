@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Build, sign and (optionally) notarize the macOS release artifact:
 #
-#   $DIST/artcraft-launcher-<version>-macos-<arch>.dmg   ArtCraft Launcher.app on a drag-to-Applications DMG
+#   $DIST/artcraft-launcher-<version>-macos-<arch>.dmg   Kojalytics Launcher.app on a drag-to-Applications DMG
 #
 # Usage: packaging/macos/package.sh [--arch universal|aarch64|x86_64] [--skip-build]
 #
@@ -18,7 +18,7 @@ HERE="$ROOT/packaging/macos"
 
 # ---- app-specific values ----------------------------------------------------------------------
 PKG=artcraft-launcher          # cargo package and binary
-APP_NAME="ArtCraft Launcher"   # display name: bundle, executable, icon, DMG volume
+APP_NAME="Kojalytics Launcher"   # display name: bundle, executable, icon, DMG volume
 
 ARCH=universal
 SKIP_BUILD=0
@@ -48,7 +48,7 @@ DMG="$DIST/$PKG-$VERSION-macos-$ARCH.dmg"
 NOTARIZE=0
 if [ "$IDENTITY" = "-" ]; then
   warn "macOS: ad-hoc signing (no MACOS_SIGN_IDENTITY); artifacts are not notarized"
-elif [ -n "${APPLE_ID:-}" ] && [ -n "${APPLE_PASSWORD:-}" ] && [ -n "${APPLE_TEAM_ID:-}" ]; then
+elif [ -n "${NOTARY_PROFILE:-}" ] || { [ -n "${APPLE_ID:-}" ] && [ -n "${APPLE_PASSWORD:-}" ] && [ -n "${APPLE_TEAM_ID:-}" ]; }; then
   NOTARIZE=1
 else
   warn "macOS: APPLE_ID / APPLE_PASSWORD / APPLE_TEAM_ID incomplete; signed but not notarized"
@@ -82,22 +82,24 @@ sign() {
 
 notarize() {
   local file="$1" out id status
+  # NOTARY_PROFILE: a Keychain profile from `xcrun notarytool store-credentials` (no password in env).
+  local auth=(--apple-id "${APPLE_ID:-}" --password "${APPLE_PASSWORD:-}" --team-id "${APPLE_TEAM_ID:-}")
+  [ -n "${NOTARY_PROFILE:-}" ] && auth=(--keychain-profile "$NOTARY_PROFILE")
   echo "==> notarizing $(basename "$file") (this can take a few minutes)"
-  out="$(xcrun notarytool submit "$file" --apple-id "$APPLE_ID" --password "$APPLE_PASSWORD" \
-    --team-id "$APPLE_TEAM_ID" --wait --timeout 1h --output-format json)" || true
+  out="$(xcrun notarytool submit "$file" "${auth[@]}" --wait --timeout 1h --output-format json)" || true
   echo "$out"
   id="$(printf '%s' "$out" | plutil -extract id raw -o - - 2>/dev/null || true)"
   status="$(printf '%s' "$out" | plutil -extract status raw -o - - 2>/dev/null || true)"
   if [ "$status" != "Accepted" ]; then
     if [ -n "$id" ]; then
-      xcrun notarytool log "$id" --apple-id "$APPLE_ID" --password "$APPLE_PASSWORD" --team-id "$APPLE_TEAM_ID" || true
+      xcrun notarytool log "$id" "${auth[@]}" || true
     fi
     echo "error: notarization of $(basename "$file") failed (status: ${status:-unknown})" >&2
     exit 1
   fi
 }
 
-# ---- ArtCraft Launcher.app ---------------------------------------------------------------------
+# ---- Kojalytics Launcher.app ---------------------------------------------------------------------
 echo "==> assembling $APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 # Executable and icon carry the display name (CFBundleExecutable / CFBundleIconFile).
