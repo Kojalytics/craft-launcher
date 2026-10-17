@@ -100,6 +100,21 @@ mod tests {
         assert_eq!(device_hash().unwrap(), hash, "stable");
     }
 
+    /// `KOJALYTICS_LICENSE_URL=http://localhost:3100/api/license/activate KOJA_TEST_KEY=KOJA-… cargo test -- --ignored`
+    #[test]
+    #[ignore = "needs a license server (KOJALYTICS_LICENSE_URL) and a fresh key (KOJA_TEST_KEY)"]
+    fn activates_a_key_against_a_live_server() {
+        let key = std::env::var("KOJA_TEST_KEY").expect("KOJA_TEST_KEY");
+        let dir = tempfile::tempdir().unwrap();
+        let paths = Paths::under(dir.path());
+        let device = device_hash().unwrap();
+        let license = activate(&Http::new().unwrap(), &paths, &key, &device).unwrap();
+        assert_eq!(license.hint, license::normalize_key(&key).unwrap()[15..]);
+        assert_eq!(load(&paths, &device), Some(license));
+        // Activating again on the same device doesn't use up another seat.
+        activate(&Http::new().unwrap(), &paths, &key, &device).unwrap();
+    }
+
     #[test]
     fn a_missing_or_foreign_certificate_is_no_license() {
         let dir = tempfile::tempdir().unwrap();
