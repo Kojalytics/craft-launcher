@@ -47,13 +47,13 @@ fn release(id: &str, v: &str, at: i64) -> Release {
         version: version::parse(v),
         name: format!("v{v}"),
         published_at: Some(at),
-        html_url: format!("https://github.com/storytold/{id}/releases/tag/v{v}"),
+        html_url: format!("https://github.com/Kojalytics/{id}/releases/tag/v{v}"),
         notes: String::new(),
         prerelease: false,
         assets: vec![Asset {
             name: name.clone(),
             size: 150 << 20,
-            url: format!("https://github.com/storytold/{id}/releases/download/v{v}/{name}"),
+            url: format!("https://github.com/Kojalytics/{id}/releases/download/v{v}/{name}"),
             sha256: None,
         }],
     }
@@ -63,7 +63,7 @@ fn events() -> Vec<Event> {
     let mut ev = Vec::new();
     for (i, app) in SUITE.iter().enumerate() {
         let latest = LatestRelease::Found(release(app.id, "0.5.0", NOW - 40 * 86_400 - i as i64 * 600));
-        ev.push(Event::Latest { app: app.id.into(), latest, from: Origin::ArtCraftApi });
+        ev.push(Event::Latest { app: app.id.into(), latest, from: Origin::KojalyticsApi });
         let installed = matches!(app.id, "photocraft" | "lightcraft").then(|| Installed {
             version: version::parse(if app.id == "photocraft" { "0.4.1" } else { "0.5.0" }),
             source: InstallSource::MacApp,
@@ -75,7 +75,7 @@ fn events() -> Vec<Event> {
     ev.push(Event::Progress { app: "filmcraft".into(), phase: JobPhase::Verifying });
     ev.push(Event::CheckFinished { at: NOW - 180, source: Source::Feed, rate_limited_until: None });
     // A backend message, translated through its `@msg` template where it's shown.
-    ev.push(Event::JobFinished { app: "lightcraft".into(), result: Ok("LightCraft updated to 0.5.0".into()) });
+    ev.push(Event::JobFinished { app: "lightcraft".into(), result: Ok("LightKoja updated to 0.5.0".into()) });
     ev
 }
 
@@ -114,12 +114,12 @@ fn french_ui_translates_labels_dates_and_messages() {
     snapshot(&mut h, "grid-fr-dark");
     // Product names stay in English.
     h.get_by_label("Launcher");
-    h.get_by_label("Craft App Suite");
+    h.get_by_label("Koja App Suite");
     h.get_by_label("Retouche d'images");
     h.get_by_label("Mettre à jour vers 0.5.0");
     h.get_by_label_contains("Vérification de la somme de contrôle…");
-    h.get_by_label_contains("Vérifié il y a 3 min · via ArtCraft API");
-    h.get_by_label("LightCraft mis à jour vers 0.5.0");
+    h.get_by_label_contains("Vérifié il y a 3 min · via Kojalytics API");
+    h.get_by_label("LightKoja mis à jour vers 0.5.0");
 
     let mut table = harness(ViewMode::Table);
     table.run_steps(8);

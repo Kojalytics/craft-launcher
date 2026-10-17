@@ -1,4 +1,4 @@
-//! The Craft App Suite: the thirteen apps the launcher knows about.
+//! The Koja App Suite: the thirteen apps the launcher knows about.
 //!
 //! The list is data so a later version can fetch it from an API; [`SUITE`] is the built-in copy.
 //!
@@ -30,12 +30,12 @@ impl AppGroup {
 pub struct CraftApp {
     /// Machine name: repo, binary, package and asset stem (`photocraft`).
     pub id: &'static str,
-    /// Display name (`PhotoCraft`).
+    /// Display name (`PhotoKoja`).
     pub name: &'static str,
     /// What it's for, in a few words (English; the UI translates it by app id).
     pub tagline: &'static str,
     pub group: AppGroup,
-    /// Brand colour (sRGB), for surfaces: getartcraft.com's `--app`.
+    /// Brand colour (sRGB), for surfaces: kojalytics.com's `--app`.
     pub color: [u8; 3],
     /// The brand colour for text on a light background (the site's light `--app-ink`).
     pub ink_light: [u8; 3],
@@ -43,16 +43,16 @@ pub struct CraftApp {
     pub ink_dark: [u8; 3],
     /// GitHub `owner/repo`.
     pub repo: &'static str,
-    /// Older names its release assets may carry (PdfCraft shipped as PrintCraft until 0.2.1).
+    /// Older names its release assets may carry (PdfKoja shipped as PrintCraft until 0.2.1).
     pub former_ids: &'static [&'static str],
-    /// Older display names its installers registered (PdfCraft's MSI said PrintCraft until 0.2.1).
+    /// Older display names its installers registered (PdfKoja's MSI said PrintCraft until 0.2.1).
     pub former_names: &'static [&'static str],
 }
 
 impl CraftApp {
-    /// `ai.storyteller.<id>`: macOS bundle id, Flatpak id and Linux desktop-file id.
+    /// `com.kojalytics.<id>`: macOS bundle id, Flatpak id and Linux desktop-file id.
     pub fn bundle_id(&self) -> String {
-        format!("ai.storyteller.{}", self.id)
+        format!("com.kojalytics.{}", self.id)
     }
 
     pub fn releases_url(&self) -> String {
@@ -63,9 +63,9 @@ impl CraftApp {
         format!("https://github.com/{}", self.repo)
     }
 
-    /// The app's page on getartcraft.com.
+    /// The app's page on kojalytics.com.
     pub fn website(&self) -> String {
-        format!("https://getartcraft.com/apps/{}", self.id)
+        format!("https://kojalytics.com/apps/{}", self.id)
     }
 
     /// Asset stems this app's releases may use, current first.
@@ -94,151 +94,142 @@ const fn app(
     CraftApp { id, name, tagline, group, color, ink_light, ink_dark, repo, former_ids: &[], former_names: &[] }
 }
 
-/// The Craft App Suite, in display order: the seven classic apps, then the six new ones.
+/// The Koja App Suite, in display order: the seven classic apps, then the six new ones.
 pub const SUITE: [CraftApp; 13] = [
     app(
         "photocraft",
-        "PhotoCraft",
+        "PhotoKoja",
         "Image editing",
         AppGroup::Classic,
         [[0x2f, 0x7b, 0xf5], [0x1a, 0x5b, 0xc4], [0x7f, 0xb0, 0xff]],
-        "storytold/photocraft",
+        "Kojalytics/photocraft",
     ),
     app(
         "vectorcraft",
-        "VectorCraft",
+        "VectorKoja",
         "Vector illustration",
         AppGroup::Classic,
         [[0xe8, 0x57, 0x3f], [0xb8, 0x3a, 0x24], [0xff, 0x8a, 0x70]],
-        "storytold/vectorcraft",
+        "Kojalytics/vectorcraft",
     ),
     app(
         "filmcraft",
-        "FilmCraft",
+        "FilmKoja",
         "Video editing, color and sound",
         AppGroup::Classic,
         [[0x8b, 0x5c, 0xf6], [0x6a, 0x3f, 0xd6], [0xb6, 0x9c, 0xff]],
-        "storytold/filmcraft",
+        "Kojalytics/filmcraft",
     ),
     app(
         "lightcraft",
-        "LightCraft",
+        "LightKoja",
         "Photo library and raw development",
         AppGroup::Classic,
         [[0xf2, 0xa5, 0x16], [0x8a, 0x58, 0x00], [0xff, 0xc1, 0x4d]],
-        "storytold/lightcraft",
+        "Kojalytics/lightcraft",
     ),
     CraftApp {
         former_ids: &["printcraft"],
         former_names: &["PrintCraft"],
         ..app(
             "pdfcraft",
-            "PdfCraft",
+            "PdfKoja",
             "Reading, organizing and protecting PDFs",
             AppGroup::Classic,
             [[0x12, 0xa5, 0x8a], [0x0a, 0x75, 0x63], [0x3f, 0xd6, 0xb8]],
-            "storytold/pdfcraft",
+            "Kojalytics/pdfcraft",
         )
     },
     app(
         "effectcraft",
-        "EffectCraft",
+        "EffectKoja",
         "Motion graphics and visual effects",
         AppGroup::Classic,
         [[0xe0, 0x36, 0x8f], [0xb0, 0x20, 0x6c], [0xff, 0x7a, 0xb8]],
-        "storytold/effectcraft",
+        "Kojalytics/effectcraft",
     ),
     app(
         "designcraft",
-        "DesignCraft",
+        "DesignKoja",
         "Page layout and publishing",
         AppGroup::Classic,
         [[0x7b, 0xb5, 0x1c], [0x45, 0x70, 0x08], [0xa6, 0xe0, 0x4a]],
-        "storytold/designcraft",
+        "Kojalytics/designcraft",
     ),
     app(
         "wordcraft",
-        "WordCraft",
+        "WordKoja",
         "Writing and document design",
         AppGroup::New,
         [[0x3f, 0x5f, 0xe0], [0x2a, 0x44, 0xb8], [0x8e, 0xa2, 0xff]],
-        "storytold/wordcraft",
+        "Kojalytics/wordcraft",
     ),
     app(
         "deckcraft",
-        "DeckCraft",
+        "DeckKoja",
         "Presentations and slide shows",
         AppGroup::New,
         [[0xf0, 0x7a, 0x1e], [0xa8, 0x4f, 0x0a], [0xff, 0xa0, 0x60]],
-        "storytold/deckcraft",
+        "Kojalytics/deckcraft",
     ),
     app(
         "gridcraft",
-        "GridCraft",
+        "GridKoja",
         "Spreadsheets and data",
         AppGroup::New,
         [[0x1f, 0x9d, 0x55], [0x12, 0x70, 0x3a], [0x4f, 0xd6, 0x8a]],
-        "storytold/gridcraft",
+        "Kojalytics/gridcraft",
     ),
     app(
         "cadcraft",
-        "CADCraft",
+        "CADKoja",
         "Computer-aided design and drafting",
         AppGroup::New,
         [[0x3e, 0xa6, 0xe8], [0x1a, 0x6f, 0xa8], [0x7c, 0xc8, 0xff]],
-        "storytold/cadcraft",
+        "Kojalytics/cadcraft",
     ),
     app(
         "soundcraft",
-        "SoundCraft",
+        "SoundKoja",
         "Recording, editing and mixing audio",
         AppGroup::New,
         [[0x1f, 0xa5, 0xc9], [0x0e, 0x72, 0x90], [0x5f, 0xd0, 0xee]],
-        "storytold/soundcraft",
+        "Kojalytics/soundcraft",
     ),
     app(
         "figcraft",
-        "FigCraft",
+        "FigKoja",
         "Interface design and prototyping",
         AppGroup::New,
         [[0x02, 0xda, 0x96], [0x04, 0x7a, 0x56], [0x4f, 0xe8, 0xb6]],
-        "storytold/figcraft",
+        "Kojalytics/figcraft",
     ),
 ];
 
-/// ArtCraft's website.
-pub const WEBSITE_URL: &str = "https://getartcraft.com";
+/// Kojalytics's website.
+pub const WEBSITE_URL: &str = "https://kojalytics.com";
 /// The GitHub account every Craft App's repository lives under: the only one the launcher
 /// installs from, whatever the release feed says.
-pub const GITHUB_OWNER: &str = "storytold";
-/// ArtCraft on GitHub: every Craft App's source.
-pub const GITHUB_URL: &str = "https://github.com/storytold";
-/// ArtCraft's social accounts: (service, URL). Shown as small icons, less prominent than Discord.
-pub const SOCIAL: [(&str, &str); 5] = [
-    ("X", "https://x.com/get_artcraft"),
-    ("Instagram", "https://www.instagram.com/officialartcraftstudios"),
-    ("LinkedIn", "https://www.linkedin.com/company/artcraft-ai"),
-    ("YouTube", "https://www.youtube.com/@OfficialArtcraftStudios"),
-    ("TikTok", "https://www.tiktok.com/@artcraft.studios"),
-];
+pub const GITHUB_OWNER: &str = "Kojalytics";
+/// Kojalytics on GitHub: every Craft App's source.
+pub const GITHUB_URL: &str = "https://github.com/Kojalytics";
+/// Kojalytics's social accounts: (service, URL), shown as small icons. Add them here.
+pub const SOCIAL: [(&str, &str); 0] = [];
 
-/// The ArtCraft community on Discord.
-pub const DISCORD_URL: &str = "https://discord.gg/artcraft";
-
-/// ArtCraft Launcher itself, described like a Craft App so it can update itself with the same
-/// machinery (asset names `artcraft-launcher-<ver>-…`, bundle id `ai.storyteller.artcraft-launcher`,
-/// `ArtCraft Launcher.app`). Not part of [`SUITE`].
+/// Kojalytics Launcher itself, described like a Craft App so it can update itself with the same
+/// machinery (asset names `artcraft-launcher-<ver>-…`, bundle id `com.kojalytics.artcraft-launcher`,
+/// `Kojalytics Launcher.app`). Not part of [`SUITE`].
 pub const LAUNCHER: CraftApp = app(
     "artcraft-launcher",
-    "ArtCraft Launcher",
-    "Installs and updates the Craft App Suite",
+    "Kojalytics Launcher",
+    "Installs and updates the Koja App Suite",
     AppGroup::New,
     [[0x0b, 0x0b, 0x0c], [0x0b, 0x0b, 0x0c], [0xf2, 0xf1, 0xee]],
-    "storytold/craft-launcher",
+    "Kojalytics/craft-launcher",
 );
 
 /// The launcher's own repo, checked so it can say when a newer launcher is out.
-pub const LAUNCHER_REPO: &str = "storytold/craft-launcher";
+pub const LAUNCHER_REPO: &str = "Kojalytics/craft-launcher";
 /// The launcher's own asset stem.
 pub const LAUNCHER_ID: &str = "artcraft-launcher";
 
@@ -255,8 +246,8 @@ mod tests {
         ids.dedup();
         assert_eq!(ids.len(), SUITE.len());
         for a in &SUITE {
-            assert_eq!(a.repo, format!("storytold/{}", a.id));
-            assert_eq!(a.name.to_lowercase(), a.id);
+            assert_eq!(a.repo, format!("Kojalytics/{}", a.id));
+            assert_eq!(a.name.to_lowercase().replace("koja", "craft"), a.id);
         }
     }
 
@@ -264,8 +255,8 @@ mod tests {
     fn pdfcraft_also_answers_to_printcraft() {
         let pdf = CraftApp::by_id("pdfcraft").unwrap();
         assert_eq!(pdf.stems().collect::<Vec<_>>(), ["pdfcraft", "printcraft"]);
-        assert_eq!(pdf.names().collect::<Vec<_>>(), ["PdfCraft", "PrintCraft"]);
-        assert_eq!(pdf.website(), "https://getartcraft.com/apps/pdfcraft");
-        assert_eq!(CraftApp::by_id("wordcraft").unwrap().website(), "https://getartcraft.com/apps/wordcraft");
+        assert_eq!(pdf.names().collect::<Vec<_>>(), ["PdfKoja", "PrintCraft"]);
+        assert_eq!(pdf.website(), "https://kojalytics.com/apps/pdfcraft");
+        assert_eq!(CraftApp::by_id("wordcraft").unwrap().website(), "https://kojalytics.com/apps/wordcraft");
     }
 }

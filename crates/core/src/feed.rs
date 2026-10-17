@@ -1,4 +1,4 @@
-//! The release feed from storyteller-web: `GET https://api.storyteller.ai/v1/craft_apps/release_info`.
+//! The release feed from storyteller-web: `GET https://kojalytics.com/api/craft_apps/release_info`.
 //!
 //! storyteller-web polls GitHub for every Craft App on a schedule and serves the result, so the
 //! launcher doesn't have to (GitHub allows 60 unauthenticated requests an hour). GitHub stays the
@@ -23,7 +23,7 @@ use crate::time::parse_rfc3339;
 use crate::version;
 
 /// Where the feed lives.
-pub const FEED_URL: &str = "https://api.storyteller.ai/v1/craft_apps/release_info";
+pub const FEED_URL: &str = "https://kojalytics.com/api/craft_apps/release_info";
 
 /// An app's entry is trusted for this long after storyteller-web fetched it.
 pub const MAX_AGE: i64 = 24 * 3600;
@@ -142,7 +142,7 @@ impl Feed {
     }
 
     /// The repo to ask GitHub about for `app`, following the feed's repo renames. Always under
-    /// [`GITHUB_OWNER`]: the feed can move an app within ArtCraft's account, never out of it.
+    /// [`GITHUB_OWNER`]: the feed can move an app within Kojalytics's account, never out of it.
     pub fn repo_for(&self, app: &CraftApp) -> String {
         let mut repo = app.repo.to_string();
         // Follow a chain of moves (a → b → c), without looping forever.
@@ -447,27 +447,27 @@ mod tests {
         "release_info": {{
           "apps": {{
             "photocraft": {{
-              "name": "PhotoCraft", "repo": "storytold/photocraft",
+              "name": "PhotoKoja", "repo": "Kojalytics/photocraft",
               "latest_release": {{
-                "tag": "v0.6.0", "version": "0.6.0", "name": "PhotoCraft v0.6.0",
+                "tag": "v0.6.0", "version": "0.6.0", "name": "PhotoKoja v0.6.0",
                 "published_at": "2026-10-09T10:00:00Z",
-                "html_url": "https://github.com/storytold/photocraft/releases/tag/v0.6.0",
+                "html_url": "https://github.com/Kojalytics/photocraft/releases/tag/v0.6.0",
                 "prerelease": false, "notes_markdown": "Notes",
                 "assets": [
                   {{ "name": "photocraft-0.6.0-macos-universal.dmg", "size_bytes": 123,
-                     "download_url": "https://github.com/storytold/photocraft/releases/download/v0.6.0/photocraft-0.6.0-macos-universal.dmg",
+                     "download_url": "https://github.com/Kojalytics/photocraft/releases/download/v0.6.0/photocraft-0.6.0-macos-universal.dmg",
                      "sha256": "{HASH}", "platform": {{ "os": "macos", "arch": "universal", "package_type": "dmg" }} }},
                   {{ "name": "evil.dmg", "size_bytes": 1, "download_url": "https://evil.example/evil.dmg", "sha256": null }}
                 ]
               }},
               "app_last_fetched": "2026-10-09T13:00:00Z"
             }},
-            "soundcraft": {{ "name": "SoundCraft", "repo": "storytold/soundcraft", "latest_release": null,
+            "soundcraft": {{ "name": "SoundKoja", "repo": "Kojalytics/soundcraft", "latest_release": null,
                              "app_last_fetched": "2026-10-09T13:00:00Z" }},
-            "filmcraft": {{ "name": "FilmCraft", "repo": "storytold/filmcraft", "latest_release": null, "app_last_fetched": null }},
-            "vectorcraft": {{ "repo": "storytold/vectorcraft", "app_last_fetched": "2026-10-01T00:00:00Z",
+            "filmcraft": {{ "name": "FilmKoja", "repo": "Kojalytics/filmcraft", "latest_release": null, "app_last_fetched": null }},
+            "vectorcraft": {{ "repo": "Kojalytics/vectorcraft", "app_last_fetched": "2026-10-01T00:00:00Z",
                               "latest_release": {{ "tag": "v0.7.0" }} }},
-            "brandnewcraft": {{ "repo": "storytold/brandnewcraft", "app_last_fetched": "2026-10-09T13:00:00Z" }}
+            "brandnewcraft": {{ "repo": "Kojalytics/brandnewcraft", "app_last_fetched": "2026-10-09T13:00:00Z" }}
           }},
           "last_fetched": "2026-10-09T13:00:00Z",
           "some_future_field": {{ "whatever": [1, 2, 3] }}
@@ -528,46 +528,46 @@ mod tests {
         let moved = sample()
             .replace(
                 "\"repo_renames\": []",
-                r#""repo_renames": [{"old_name": "Storytold/photocraft", "new_name": "storytold/photocraft-app", "renamed_at": null}]"#,
+                r#""repo_renames": [{"old_name": "Kojalytics/photocraft", "new_name": "Kojalytics/photocraft-app", "renamed_at": null}]"#,
             )
             .replace(
-                "\"name\": \"PhotoCraft\", \"repo\": \"storytold/photocraft\"",
-                "\"name\": \"PhotoCraft\", \"repo\": \"storytold/photocraft-app\"",
+                "\"name\": \"PhotoKoja\", \"repo\": \"Kojalytics/photocraft\"",
+                "\"name\": \"PhotoKoja\", \"repo\": \"Kojalytics/photocraft-app\"",
             )
-            .replace("github.com/storytold/photocraft/releases", "github.com/storytold/photocraft-app/releases");
+            .replace("github.com/Kojalytics/photocraft/releases", "github.com/Kojalytics/photocraft-app/releases");
         let feed = Feed::parse(&moved).unwrap();
-        assert_eq!(feed.repo_for(app("photocraft")), "storytold/photocraft-app");
+        assert_eq!(feed.repo_for(app("photocraft")), "Kojalytics/photocraft-app");
         let FeedAnswer::Fresh(Some(r)) = feed.answer(app("photocraft"), NOW) else { panic!() };
-        assert!(r.assets[0].url.starts_with("https://github.com/storytold/photocraft-app/releases/download/"));
+        assert!(r.assets[0].url.starts_with("https://github.com/Kojalytics/photocraft-app/releases/download/"));
         // The same entry without the rename: the repo doesn't match, so GitHub decides.
-        let unannounced = moved.replace(r#"{"old_name": "Storytold/photocraft", "new_name": "storytold/photocraft-app", "renamed_at": null}"#, "");
+        let unannounced = moved.replace(r#"{"old_name": "Kojalytics/photocraft", "new_name": "Kojalytics/photocraft-app", "renamed_at": null}"#, "");
         let feed = Feed::parse(&unannounced).unwrap();
         assert_eq!(feed.answer(app("photocraft"), NOW), FeedAnswer::AskGitHub);
     }
 
     #[test]
-    fn a_rename_out_of_storytold_is_dropped() {
+    fn a_rename_out_of_Kojalytics_is_dropped() {
         // Even a feed that vouches for the new repository, with matching links and checksums,
         // can't send an app's downloads to another account (#90).
         let moved = sample()
             .replace(
                 "\"repo_renames\": []",
-                r#""repo_renames": [{"old_name": "storytold/photocraft", "new_name": "art/photocraft", "renamed_at": null},
-                                  {"old_name": "art/photocraft", "new_name": "storytold/photocraft", "renamed_at": null},
-                                  {"old_name": "storytold/photocraft", "new_name": "storytold.evil.example/photocraft", "renamed_at": null}]"#,
+                r#""repo_renames": [{"old_name": "Kojalytics/photocraft", "new_name": "art/photocraft", "renamed_at": null},
+                                  {"old_name": "art/photocraft", "new_name": "Kojalytics/photocraft", "renamed_at": null},
+                                  {"old_name": "Kojalytics/photocraft", "new_name": "Kojalytics.evil.example/photocraft", "renamed_at": null}]"#,
             )
-            .replace("\"name\": \"PhotoCraft\", \"repo\": \"storytold/photocraft\"", "\"name\": \"PhotoCraft\", \"repo\": \"art/photocraft\"")
-            .replace("github.com/storytold/photocraft/releases", "github.com/art/photocraft/releases");
+            .replace("\"name\": \"PhotoKoja\", \"repo\": \"Kojalytics/photocraft\"", "\"name\": \"PhotoKoja\", \"repo\": \"art/photocraft\"")
+            .replace("github.com/Kojalytics/photocraft/releases", "github.com/art/photocraft/releases");
         let feed = Feed::parse(&moved).unwrap();
         assert!(feed.repo_renames.is_empty(), "{:?}", feed.repo_renames);
-        assert_eq!(feed.repo_for(app("photocraft")), "storytold/photocraft");
+        assert_eq!(feed.repo_for(app("photocraft")), "Kojalytics/photocraft");
         assert_eq!(feed.answer(app("photocraft"), NOW), FeedAnswer::AskGitHub);
     }
 
     #[test]
     fn a_local_mirror_is_trusted_only_when_asked_for_and_never_goes_stale() {
         const MIRROR: &str = "http://127.0.0.1:8787/";
-        let local = sample().replace("https://github.com/storytold/photocraft/releases/download/v0.6.0/", "http://127.0.0.1:8787/photocraft/v0.6.0/");
+        let local = sample().replace("https://github.com/Kojalytics/photocraft/releases/download/v0.6.0/", "http://127.0.0.1:8787/photocraft/v0.6.0/");
         // Without the mirror, the local link is dropped like any other stranger's.
         let FeedAnswer::Fresh(Some(r)) = Feed::parse(&local).unwrap().answer(app("photocraft"), NOW) else { panic!() };
         assert!(r.assets.is_empty());
@@ -606,25 +606,25 @@ mod tests {
         let with_notices = sample()
             .replace(
                 "\"announcements\": []",
-                r#""announcements": [{"title": "New: CADCraft 1.0", "body": "It's here.", "created_at": "2026-10-09T09:00:00Z"}]"#,
+                r#""announcements": [{"title": "New: CADKoja 1.0", "body": "It's here.", "created_at": "2026-10-09T09:00:00Z"}]"#,
             )
             .replace(
                 "\"alerts\": []",
                 r#""alerts": [
-            {"title": "Security update", "body": "Update PdfCraft now.", "maybe_web_link": "https://getartcraft.com/security", "created_at": null},
+            {"title": "Security update", "body": "Update PdfKoja now.", "maybe_web_link": "https://kojalytics.com/security", "created_at": null},
             {"title": "Bad link", "body": "x", "maybe_web_link": "javascript:alert(1)"}]"#,
             )
             .replace(
                 "\"app_renames\": []",
-                r#""app_renames": [{"old_name": "PdfCraft", "old_name_lower": "pdfcraft", "new_name": "DocuCraft",
+                r#""app_renames": [{"old_name": "PdfKoja", "old_name_lower": "pdfcraft", "new_name": "DocuCraft",
             "new_name_lower": "docucraft", "description": "Same app, new name.", "renamed_at": "2026-10-09T08:00:00Z"}]"#,
             );
         let feed = Feed::parse(&with_notices).unwrap();
         assert_eq!(feed.alerts.len(), 2);
-        assert_eq!(feed.alerts[0].link.as_deref(), Some("https://getartcraft.com/security"));
+        assert_eq!(feed.alerts[0].link.as_deref(), Some("https://kojalytics.com/security"));
         assert_eq!(feed.alerts[1].link, None, "only web links are kept");
         let titles: Vec<&str> = feed.announcements.iter().map(|n| n.title.as_str()).collect();
-        assert_eq!(titles, ["New: CADCraft 1.0", "PdfCraft is now DocuCraft"]);
+        assert_eq!(titles, ["New: CADKoja 1.0", "PdfKoja is now DocuCraft"]);
         // Ids are stable across parses, so dismissals stick.
         assert_eq!(Feed::parse(&with_notices).unwrap().alerts[0].id, feed.alerts[0].id);
     }

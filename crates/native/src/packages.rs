@@ -1,4 +1,4 @@
-//! Reading system package lists (dpkg, rpm, pacman, Flatpak) and matching them to Craft Apps.
+//! Reading system package lists (dpkg, rpm, pacman, Flatpak) and matching them to Koja Apps.
 //!
 //! Pure functions over the tools' text output, so they're tested on every platform; only Linux
 //! runs the tools (`detect::linux`).
@@ -66,7 +66,7 @@ pub fn parse_flatpak_info(text: &str) -> Option<String> {
 /// The package names a Craft App may be installed under with `manager`. On Arch the AUR carries
 /// each app three ways: built from source (`photocraft`), the release binary (`photocraft-bin`)
 /// and the latest commit (`photocraft-git`). Debian and RPM packages may use either the short stem
-/// (`photocraft`) or the reverse-DNS bundle id (`ai.storyteller.photocraft`).
+/// (`photocraft`) or the reverse-DNS bundle id (`com.kojalytics.photocraft`).
 pub fn candidate_names(app: &CraftApp, manager: InstallSource) -> Vec<String> {
     match manager {
         InstallSource::Flatpak => vec![app.bundle_id()],
@@ -108,10 +108,10 @@ mod tests {
         assert_eq!(parse_rpm("gridcraft|0.3.0\n"), [("gridcraft".into(), "0.3.0".into())]);
         assert_eq!(parse_pacman("photocraft-bin 0.5.0-1\nlinux 6.11.1.arch1-1\n").len(), 2);
         assert_eq!(
-            parse_flatpak_list("ai.storyteller.wordcraft\t\nai.storyteller.cadcraft\t0.3.0\n"),
-            [("ai.storyteller.wordcraft".into(), String::new()), ("ai.storyteller.cadcraft".into(), "0.3.0".into())]
+            parse_flatpak_list("com.kojalytics.wordcraft\t\ncom.kojalytics.cadcraft\t0.3.0\n"),
+            [("com.kojalytics.wordcraft".into(), String::new()), ("com.kojalytics.cadcraft".into(), "0.3.0".into())]
         );
-        let info = "\nWordCraft - Word processor\n\n          ID: ai.storyteller.wordcraft\n     Version: 0.3.0\n      Branch: master\n";
+        let info = "\nWordCraft - Word processor\n\n          ID: com.kojalytics.wordcraft\n     Version: 0.3.0\n      Branch: master\n";
         assert_eq!(parse_flatpak_info(info).as_deref(), Some("0.3.0"));
         assert_eq!(parse_flatpak_info("Version: \n"), None);
     }
@@ -121,16 +121,16 @@ mod tests {
         let photo = CraftApp::by_id("photocraft").unwrap();
         let deb_names = candidate_names(photo, InstallSource::Deb);
         assert!(deb_names.contains(&"photocraft".to_string()));
-        assert!(deb_names.contains(&"ai.storyteller.photocraft".to_string()));
+        assert!(deb_names.contains(&"com.kojalytics.photocraft".to_string()));
 
         let rpm_names = candidate_names(photo, InstallSource::Rpm);
         assert!(rpm_names.contains(&"photocraft".to_string()));
-        assert!(rpm_names.contains(&"ai.storyteller.photocraft".to_string()));
+        assert!(rpm_names.contains(&"com.kojalytics.photocraft".to_string()));
 
         let pacman_names = candidate_names(photo, InstallSource::Pacman);
         assert!(pacman_names.contains(&"photocraft".to_string()));
         assert!(pacman_names.contains(&"photocraft-bin".to_string()));
-        assert!(pacman_names.contains(&"ai.storyteller.photocraft".to_string()));
+        assert!(pacman_names.contains(&"com.kojalytics.photocraft".to_string()));
     }
 
     #[test]
@@ -142,7 +142,7 @@ mod tests {
         let hit = find(photo, &installed, &[InstallSource::Pacman]).unwrap();
         assert_eq!(hit.name, "photocraft-git");
         assert_eq!(version_of(hit).unwrap().to_string(), "0.3.0");
-        // PdfCraft under its old name.
+        // PdfKoja under its old name.
         assert_eq!(find(pdf, &installed, &[InstallSource::Pacman]).unwrap().name, "printcraft-bin");
         assert!(find(CraftApp::by_id("wordcraft").unwrap(), &installed, &[InstallSource::Pacman]).is_none());
     }
@@ -151,7 +151,7 @@ mod tests {
     fn prefers_managers_in_order_and_reads_revisions() {
         let photo = CraftApp::by_id("photocraft").unwrap();
         let mut installed = pkgs(InstallSource::Deb, parse_dpkg("photocraft|installed|0.5.0-1\n"));
-        installed.extend(pkgs(InstallSource::Flatpak, parse_flatpak_list("ai.storyteller.photocraft\t0.4.0\n")));
+        installed.extend(pkgs(InstallSource::Flatpak, parse_flatpak_list("com.kojalytics.photocraft\t0.4.0\n")));
         let hit = find(photo, &installed, &[InstallSource::Deb, InstallSource::Flatpak]).unwrap();
         assert_eq!(hit.manager, InstallSource::Deb);
         // 0.5.0-1 is the 0.5.0 release, not a pre-release of it.

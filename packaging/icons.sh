@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
-# Regenerate every app and tray icon from the ArtCraft "A" mark in docs/brand/, rendered exactly as
-# supplied. The mark is an ArtCraft trademark, NOT MIT/Apache: docs/brand/LICENSE-brand.txt.
+# Regenerate every app and tray icon from the Kojalytics "K" mark in docs/brand/.
+# The mark is a Kojalytics trademark, NOT MIT/Apache.
 #
-# - App icon (Dock, taskbar, Start menu, Linux menus, installers): the blue mark, which is also
-#   getartcraft.com's favicon.
+# - App icon (Dock, taskbar, Start menu, Linux menus, installers): the indigo mark.
 # - Tray: the black mark as the macOS menu-bar template; the blue mark on Windows, Linux and BSD.
 #
 # Needs: resvg (brew install resvg / cargo install resvg). The .ico and .icns are packed by
@@ -15,8 +14,8 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DIR="$ROOT/assets/app-icon"
 BRAND="$ROOT/docs/brand"
-SVG="$BRAND/artcraft-mark.svg"
-ID="ai.storyteller.artcraft-launcher"
+SVG="$BRAND/kojalytics-mark.svg"
+ID="com.kojalytics.artcraft-launcher"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 
@@ -24,10 +23,10 @@ command -v resvg >/dev/null || { echo "error: resvg not found (brew install resv
 
 # The mark's artwork is untouched. macOS icons get a little more transparent margin (Apple's
 # 824/1024 icon grid) by widening the view box around it; everything else uses the file as is.
-BOX='viewBox="-10 -19.42 136.34 136.34"'
+BOX='viewBox="0 0 100 100"'
 grep -q "$BOX" "$SVG" || { echo "error: expected $BOX in $SVG" >&2; exit 1; }
 MAC="$TMP/mac.svg"
-sed "s/$BOX/viewBox=\"-17.5 -26.92 151.34 151.34\"/" "$SVG" >"$MAC"
+sed "s/$BOX/viewBox=\"-11 -11 122 122\"/" "$SVG" >"$MAC"
 FLAT="$SVG"
 
 render() { resvg -w "$2" -h "$2" "$1" "$3" </dev/null; }
@@ -61,6 +60,6 @@ done
 
 # Tray icons: the black mark is the macOS menu-bar template (44 px = 22 pt @2x; macOS tints it);
 # the blue one is for the Windows notification area and Linux/BSD status notifiers.
-render "$BRAND/artcraft-mark-black.svg" 44 "$BRAND/artcraft-mark-black-44.png"
-render "$BRAND/artcraft-mark.svg" 64 "$BRAND/artcraft-mark-64.png"
+render "$BRAND/kojalytics-mark-black.svg" 44 "$BRAND/kojalytics-mark-black-44.png"
+render "$BRAND/kojalytics-mark.svg" 64 "$BRAND/kojalytics-mark-64.png"
 echo "icons written to $DIR"

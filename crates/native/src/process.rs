@@ -1,4 +1,4 @@
-//! Starting programs: the Craft Apps themselves, the file manager, and helper tools.
+//! Starting programs: the Koja Apps themselves, the file manager, and helper tools.
 
 use std::path::Path;
 use std::process::{Command, Stdio};
@@ -294,10 +294,10 @@ mod tests {
     fn running_paths_are_matched_literally() {
         let root = format!("/tmp/artcraft-launcher-process-{}", std::process::id());
         for (actual, requested, expected) in [
-            ("plain/PhotoCraft.app", "plain/PhotoCraft.app", true),
-            ("Apps (work)/PhotoCraft.app", "Apps (work)/PhotoCraft.app", true),
-            ("Apps [work]/PhotoCraft.app", "Apps [work]/PhotoCraft.app", true),
-            ("other/PhotoCraftXapp", "other/PhotoCraft.app", false),
+            ("plain/PhotoKoja.app", "plain/PhotoKoja.app", true),
+            ("Apps (work)/PhotoKoja.app", "Apps (work)/PhotoKoja.app", true),
+            ("Apps [work]/PhotoKoja.app", "Apps [work]/PhotoKoja.app", true),
+            ("other/PhotoCraftXapp", "other/PhotoKoja.app", false),
             ("symbols/应用.^$*+?()[]{}|\\.app", "symbols/应用.^$*+?()[]{}|\\.app", true),
         ] {
             let actual = format!("{root}/{actual}");
@@ -340,8 +340,8 @@ mod explorer_tests {
 
     #[test]
     fn explorer_select_quotes_only_the_path() {
-        let arg = explorer_select_arg(Path::new(r"C:\Program Files\PhotoCraft\photocraft.exe"));
-        assert_eq!(arg.unwrap(), r#"/select,"C:\Program Files\PhotoCraft\photocraft.exe""#);
+        let arg = explorer_select_arg(Path::new(r"C:\Program Files\PhotoKoja\photocraft.exe"));
+        assert_eq!(arg.unwrap(), r#"/select,"C:\Program Files\PhotoKoja\photocraft.exe""#);
     }
 
     #[test]
@@ -353,7 +353,7 @@ mod explorer_tests {
 
     #[test]
     fn explorer_select_uses_backslashes() {
-        let arg = explorer_select_arg(Path::new("C:/Users/A B/AppData/Local/ArtCraft Launcher/apps/photocraft.exe"));
-        assert_eq!(arg.unwrap(), r#"/select,"C:\Users\A B\AppData\Local\ArtCraft Launcher\apps\photocraft.exe""#);
+        let arg = explorer_select_arg(Path::new("C:/Users/A B/AppData/Local/Kojalytics Launcher/apps/photocraft.exe"));
+        assert_eq!(arg.unwrap(), r#"/select,"C:\Users\A B\AppData\Local\Kojalytics Launcher\apps\photocraft.exe""#);
     }
 }

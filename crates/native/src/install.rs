@@ -1,4 +1,4 @@
-//! Installing, updating, removing and starting Craft Apps.
+//! Installing, updating, removing and starting Koja Apps.
 //!
 //! Apps go where their platform keeps applications, installed the platform's own way:
 //!
@@ -468,7 +468,7 @@ fn home_env(home: &Path) -> [(&'static str, PathBuf); 5] {
 }
 
 /// Creates the folders an app unpacked by the launcher expects to find, and links the host's
-/// `~/.vst3` and `~/.clap` (SoundCraft's plugin folders) in when they exist, so an app running
+/// `~/.vst3` and `~/.clap` (SoundKoja's plugin folders) in when they exist, so an app running
 /// inside the sandbox still sees the plugins installed on the host. Every failure here is
 /// ignored: the app is worth starting even if its home is not quite ready.
 #[cfg(target_os = "linux")]
@@ -828,7 +828,7 @@ pub(crate) mod linux {
         let dest = dir.join(name);
         let ours = previous.is_some_and(|r| r.kind == PackageKind::AppImage && r.path == dest);
         if std::fs::symlink_metadata(&dest).is_ok_and(|m| m.is_dir() || !(replace || ours && m.is_file())) {
-            return Err(format!("{} already exists and wasn't installed by ArtCraft Launcher", dest.display()));
+            return Err(format!("{} already exists and wasn't installed by Kojalytics Launcher", dest.display()));
         }
         let staging = super::staging_dir(&dir)?;
         let partial = staging.path().join(name);
@@ -1037,7 +1037,7 @@ pub mod macos {
         Ok(user)
     }
 
-    /// The Apple Developer team that signs every Craft App and ArtCraft Launcher (Learning
+    /// The Apple Developer team that signs every Craft App and Kojalytics Launcher (Learning
     /// Machines LLC): the macOS side of the Windows publisher check.
     pub const TEAM_ID: &str = "DJ6XS33FX8";
 
@@ -1137,7 +1137,7 @@ pub mod macos {
             && std::fs::symlink_metadata(&dest).is_ok()
             && (std::fs::symlink_metadata(&dest).is_ok_and(|m| m.file_type().is_symlink()) || crate::detect::macos::read_bundle(app, &dest).is_none())
         {
-            return Err(format!("{} already exists and wasn't installed by ArtCraft Launcher", dest.display()));
+            return Err(format!("{} already exists and wasn't installed by Kojalytics Launcher", dest.display()));
         }
         let staging = super::staging_dir(&dir)?;
         let staged = staging.path().join(&bundle);
@@ -1422,18 +1422,18 @@ mod tests {
         assert!(selected_folder("bad\nfolder", true).is_err());
         let app = CraftApp::by_id("photocraft").unwrap();
         let locations = InstallLocations { root: Some(dir.path().display().to_string()), ..Default::default() };
-        assert_eq!(destination(app, PackageKind::Msi, None, None, &locations).unwrap(), Some(dir.path().join("PhotoCraft")));
+        assert_eq!(destination(app, PackageKind::Msi, None, None, &locations).unwrap(), Some(dir.path().join("PhotoKoja")));
         assert_eq!(destination(app, PackageKind::PortableZip, None, None, &locations).unwrap(), Some(dir.path().to_path_buf()));
-        let old = record("0.5.0", PackageKind::PortableZip, dir.path().join("PhotoCraft/photocraft.exe"), vec![], false);
+        let old = record("0.5.0", PackageKind::PortableZip, dir.path().join("PhotoKoja/photocraft.exe"), vec![], false);
         let unavailable = InstallLocations { root: Some(dir.path().join("missing").display().to_string()), ..Default::default() };
         assert_eq!(destination(app, PackageKind::PortableZip, None, Some(&old), &unavailable).unwrap(), None);
         let msi = Installed {
             version: None,
             source: InstallSource::Msi,
-            location: dir.path().join("MSI/PhotoCraft/photocraft.exe").display().to_string(),
+            location: dir.path().join("MSI/PhotoKoja/photocraft.exe").display().to_string(),
             package: None,
         };
-        assert_eq!(destination(app, PackageKind::Msi, Some(&msi), Some(&old), &unavailable).unwrap(), Some(dir.path().join("MSI/PhotoCraft")));
+        assert_eq!(destination(app, PackageKind::Msi, Some(&msi), Some(&old), &unavailable).unwrap(), Some(dir.path().join("MSI/PhotoKoja")));
         assert!(destination(app, PackageKind::TarGz, None, None, &locations).unwrap_err().contains("aren't supported"));
     }
 
@@ -1461,9 +1461,9 @@ mod tests {
     fn msi_folder_assignment_preserves_spaces_unicode_and_root_separators() {
         for (value, argument) in [
             (r"D:\", r#"INSTALLFOLDER="D:\""#),
-            (r"D:\Craft Apps\PhotoCraft", r#"INSTALLFOLDER="D:\Craft Apps\PhotoCraft""#),
+            (r"D:\Koja Apps\PhotoKoja", r#"INSTALLFOLDER="D:\Koja Apps\PhotoKoja""#),
             (r"\\server\apps\绘画", r#"INSTALLFOLDER="\\server\apps\绘画""#),
-            (r"D:\Craft Apps\", r#"INSTALLFOLDER="D:\Craft Apps\""#),
+            (r"D:\Koja Apps\", r#"INSTALLFOLDER="D:\Koja Apps\""#),
         ] {
             assert_eq!(msi_folder_argument(Path::new(value)).unwrap(), argument);
         }
@@ -1475,7 +1475,7 @@ mod tests {
     #[test]
     fn appimage_updates_replace_only_the_recorded_file_in_the_same_folder() {
         let dir = tempfile::tempdir().unwrap();
-        let folder = dir.path().join("Craft Apps");
+        let folder = dir.path().join("Koja Apps");
         std::fs::create_dir(&folder).unwrap();
         let download = dir.path().join("download");
         std::fs::write(&download, "first").unwrap();
@@ -1741,7 +1741,7 @@ mod tests {
         let tree_style = dir.path().join("tree.tar.gz");
         tarball(
             &tree_style,
-            &["wordcraft-0.3.0-freebsd-x86_64/bin/wordcraft", "wordcraft-0.3.0-freebsd-x86_64/share/applications/ai.storyteller.wordcraft.desktop"],
+            &["wordcraft-0.3.0-freebsd-x86_64/bin/wordcraft", "wordcraft-0.3.0-freebsd-x86_64/share/applications/com.kojalytics.wordcraft.desktop"],
         );
         let flat_style = dir.path().join("flat.tar.gz");
         tarball(
@@ -1750,15 +1750,15 @@ mod tests {
                 "wordcraft-0.3.0-freebsd-x86_64/wordcraft",
                 "wordcraft-0.3.0-freebsd-x86_64/wordcraft-cli",
                 "wordcraft-0.3.0-freebsd-x86_64/README.md",
-                "wordcraft-0.3.0-freebsd-x86_64/ai.storyteller.wordcraft.desktop",
-                "wordcraft-0.3.0-freebsd-x86_64/ai.storyteller.wordcraft.png",
+                "wordcraft-0.3.0-freebsd-x86_64/com.kojalytics.wordcraft.desktop",
+                "wordcraft-0.3.0-freebsd-x86_64/com.kojalytics.wordcraft.png",
             ],
         );
         for file in [tree_style, flat_style] {
             let root = tree::unpack(app, &file, &dir.path().join("staging")).unwrap();
             let files = tree::files(&root);
             assert!(files.contains(&PathBuf::from("bin/wordcraft")), "{files:?}");
-            assert!(files.contains(&PathBuf::from("share/applications/ai.storyteller.wordcraft.desktop")), "{files:?}");
+            assert!(files.contains(&PathBuf::from("share/applications/com.kojalytics.wordcraft.desktop")), "{files:?}");
             assert!(!files.iter().any(|f| f.ends_with("README.md")), "{files:?}");
         }
         let bad = dir.path().join("bad.tar.gz");
@@ -1778,7 +1778,7 @@ mod tests {
             &[
                 "wordcraft-0.3.0-linux-x86_64/bin/wordcraft",
                 "wordcraft-0.3.0-linux-x86_64/bin/wordcraft-cli",
-                "wordcraft-0.3.0-linux-x86_64/share/applications/ai.storyteller.wordcraft.desktop",
+                "wordcraft-0.3.0-linux-x86_64/share/applications/com.kojalytics.wordcraft.desktop",
             ],
         );
 
@@ -1786,7 +1786,7 @@ mod tests {
         let root = paths.apps().join("wordcraft");
         assert_eq!(bin, root.join("bin").join("wordcraft"));
         assert!(bin.is_file(), "the app's binary wasn't unpacked");
-        assert!(root.join("share/applications/ai.storyteller.wordcraft.desktop").is_file(), "share/ wasn't unpacked");
+        assert!(root.join("share/applications/com.kojalytics.wordcraft.desktop").is_file(), "share/ wasn't unpacked");
         assert!(!paths.cache.join("wordcraft.new").exists(), "the staging folder was left behind");
 
         // The app's own home sits beside the tree, and an update keeps it.
@@ -1925,8 +1925,8 @@ mod tests {
         let app = CraftApp::by_id("wordcraft").unwrap();
         let root = tempfile::tempdir().unwrap();
         let data = root.path().join("share");
-        let desktop = data.join("applications/ai.storyteller.wordcraft.desktop");
-        let icon = data.join("icons/hicolor/128x128/apps/ai.storyteller.wordcraft.png");
+        let desktop = data.join("applications/com.kojalytics.wordcraft.desktop");
+        let icon = data.join("icons/hicolor/128x128/apps/com.kojalytics.wordcraft.png");
         let old = root.path().join("My Apps/wordcraft-0.2.0-linux-x86_64.AppImage");
         let new = root.path().join("My Apps/wordcraft-0.3.0-linux-x86_64.AppImage");
         std::fs::create_dir_all(new.parent().unwrap()).unwrap();
@@ -1937,7 +1937,7 @@ mod tests {
         assert_eq!(files, [icon.clone(), desktop.clone()]);
         let text = std::fs::read_to_string(&desktop).unwrap();
         assert!(text.contains("Exec=\"") && text.contains("My Apps/wordcraft-0.3.0-linux-x86_64.AppImage\" %F\n"), "{text}");
-        assert!(text.contains("Icon=ai.storyteller.wordcraft\n"));
+        assert!(text.contains("Icon=com.kojalytics.wordcraft\n"));
         assert!(std::fs::read(&icon).unwrap().starts_with(b"\x89PNG"));
         let rec = record("0.3.0", PackageKind::AppImage, new.clone(), files, false);
 
@@ -2059,33 +2059,33 @@ mod tests {
             SUITE.iter().find(|a| a.id == "photocraft").unwrap()
         }
 
-        /// A minimal `PhotoCraft.app` at `dir`, reporting `version`.
+        /// A minimal `PhotoKoja.app` at `dir`, reporting `version`.
         fn bundle(dir: &Path, version: &str) -> PathBuf {
-            let app = dir.join("PhotoCraft.app");
+            let app = dir.join("PhotoKoja.app");
             let contents = app.join("Contents");
             std::fs::create_dir_all(contents.join("MacOS")).unwrap();
             std::fs::write(
                 contents.join("Info.plist"),
                 format!(
                     "<?xml version=\"1.0\" encoding=\"UTF-8\"?><plist version=\"1.0\"><dict>\
-                     <key>CFBundleIdentifier</key><string>ai.storyteller.photocraft</string>\
-                     <key>CFBundleExecutable</key><string>PhotoCraft</string>\
+                     <key>CFBundleIdentifier</key><string>com.kojalytics.photocraft</string>\
+                     <key>CFBundleExecutable</key><string>PhotoKoja</string>\
                      <key>CFBundleShortVersionString</key><string>{version}</string></dict></plist>"
                 ),
             )
             .unwrap();
-            std::fs::write(contents.join("MacOS/PhotoCraft"), version).unwrap();
+            std::fs::write(contents.join("MacOS/PhotoKoja"), version).unwrap();
             app
         }
 
-        /// A release-style disk image holding a `PhotoCraft.app` that reports `version`.
+        /// A release-style disk image holding a `PhotoKoja.app` that reports `version`.
         fn dmg(dir: &Path, version: &str) -> PathBuf {
             let src = dir.join(format!("src-{version}"));
             bundle(&src, version);
             let dmg = dir.join(format!("photocraft-{version}-macos-universal.dmg"));
             let _one_at_a_time = super::macos::DISK_IMAGES.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
             let ok = std::process::Command::new("hdiutil")
-                .args(["create", "-quiet", "-format", "UDZO", "-volname", "PhotoCraft", "-srcfolder"])
+                .args(["create", "-quiet", "-format", "UDZO", "-volname", "PhotoKoja", "-srcfolder"])
                 .arg(&src)
                 .arg(&dmg)
                 .status()
@@ -2098,13 +2098,13 @@ mod tests {
         #[test]
         fn custom_bundles_are_detected_and_updates_stay_in_their_actual_location() {
             let dir = tempfile::tempdir().unwrap();
-            let apps = dir.path().join("Craft Apps");
+            let apps = dir.path().join("Koja Apps");
             std::fs::create_dir(&apps).unwrap();
             let paths = Paths::under(dir.path());
             let image = dmg(dir.path(), "0.6.0");
             let expect = Expect { team: None, version: None };
             let placed = install_dmg(photocraft(), &image, None, Some(&apps), false, &paths, &expect).unwrap();
-            assert_eq!(placed, apps.join("PhotoCraft.app"));
+            assert_eq!(placed, apps.join("PhotoKoja.app"));
             let mut manifest = crate::manifest::Manifest::default();
             manifest.apps.insert("photocraft".into(), record("0.6.0", PackageKind::Dmg, placed.clone(), vec![], false));
             let existing = crate::detect::detect(photocraft(), &manifest, &crate::detect::Snapshot::default()).unwrap();
@@ -2116,7 +2116,7 @@ mod tests {
             std::fs::create_dir(&new_default).unwrap();
             let update = dmg(dir.path(), "0.7.0");
             assert_eq!(install_dmg(photocraft(), &update, Some(&existing), Some(&new_default), false, &paths, &expect).unwrap(), placed);
-            assert!(!new_default.join("PhotoCraft.app").exists());
+            assert!(!new_default.join("PhotoKoja.app").exists());
             let detected = crate::detect::detect(photocraft(), &manifest, &crate::detect::Snapshot::default()).unwrap();
             assert_eq!(detected.version.unwrap().to_string(), "0.7.0");
             std::fs::write(placed.join("Contents/Info.plist"), "invalid").unwrap();
@@ -2131,14 +2131,14 @@ mod tests {
             let dir = tempfile::tempdir().unwrap();
             let placed = bundle(dir.path(), "0.5.0");
             let plist = placed.join("Contents/Info.plist");
-            let unrelated = std::fs::read_to_string(&plist).unwrap().replace("ai.storyteller.photocraft", "com.example.other");
+            let unrelated = std::fs::read_to_string(&plist).unwrap().replace("com.kojalytics.photocraft", "com.example.other");
             std::fs::write(&plist, &unrelated).unwrap();
             let image = dmg(dir.path(), "0.6.0");
             let result =
                 install_dmg(photocraft(), &image, None, Some(dir.path()), false, &Paths::under(dir.path()), &Expect { team: None, version: None });
             assert!(result.unwrap_err().contains("already exists"));
             assert_eq!(std::fs::read_to_string(plist).unwrap(), unrelated);
-            assert_eq!(std::fs::read(placed.join("Contents/MacOS/PhotoCraft")).unwrap(), b"0.5.0");
+            assert_eq!(std::fs::read(placed.join("Contents/MacOS/PhotoKoja")).unwrap(), b"0.5.0");
         }
 
         #[test]
@@ -2167,19 +2167,19 @@ mod tests {
             let image = dmg(dir.path(), "0.6.0");
 
             for (release, ok) in [("0.6.0", true), ("0.7.0", false), ("0.6.0-rc.1", true), ("0.5.0", false)] {
-                std::fs::write(current.join("Contents/MacOS/PhotoCraft"), "0.5.0").unwrap();
+                std::fs::write(current.join("Contents/MacOS/PhotoKoja"), "0.5.0").unwrap();
                 let want = version::parse(release).unwrap();
                 let expect = Expect { team: None, version: Some(&want) };
                 let result = install_dmg(photocraft(), &image, Some(&existing), None, false, &paths, &expect);
                 assert_eq!(result.is_ok(), ok, "release {release}: {result:?}");
-                let now = std::fs::read_to_string(current.join("Contents/MacOS/PhotoCraft")).unwrap();
+                let now = std::fs::read_to_string(current.join("Contents/MacOS/PhotoKoja")).unwrap();
                 assert_eq!(now, if ok { "0.6.0" } else { "0.5.0" }, "release {release}");
                 if !ok {
                     assert_eq!(result, Err(format!("the app inside isn't version {release}, so it wasn't installed")));
                 }
                 assert_eq!(
                     std::fs::read_dir(&apps).unwrap().map(|e| e.unwrap().file_name()).collect::<Vec<_>>(),
-                    [std::ffi::OsString::from("PhotoCraft.app")]
+                    [std::ffi::OsString::from("PhotoKoja.app")]
                 );
             }
 
@@ -2201,14 +2201,14 @@ mod tests {
 
             let result = install_dmg(photocraft(), &image, Some(&existing), None, false, &Paths::under(dir.path()), &Expect::release(&release));
             assert_eq!(result, Err("the app isn't signed by its developer, so it wasn't installed".into()));
-            assert_eq!(std::fs::read_to_string(current.join("Contents/MacOS/PhotoCraft")).unwrap(), "0.5.0");
+            assert_eq!(std::fs::read_to_string(current.join("Contents/MacOS/PhotoKoja")).unwrap(), "0.5.0");
             assert_eq!(
                 std::fs::read_dir(&apps).unwrap().map(|e| e.unwrap().file_name()).collect::<Vec<_>>(),
-                [std::ffi::OsString::from("PhotoCraft.app")]
+                [std::ffi::OsString::from("PhotoKoja.app")]
             );
         }
 
-        /// A real release passes. Run with `CRAFT_APP=/path/to/PhotoCraft.app cargo test -p
+        /// A real release passes. Run with `CRAFT_APP=/path/to/PhotoKoja.app cargo test -p
         /// artcraft-launcher-native -- --ignored a_real_craft_app`.
         #[test]
         #[ignore = "needs a Craft App from a real release"]

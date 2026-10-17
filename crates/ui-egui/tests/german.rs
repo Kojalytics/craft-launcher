@@ -51,13 +51,13 @@ fn release(id: &str, v: &str, at: i64) -> Release {
         version: version::parse(v),
         name: format!("v{v}"),
         published_at: Some(at),
-        html_url: format!("https://github.com/storytold/{id}/releases/tag/v{v}"),
-        notes: "## What's Changed\n* Faster things by @a in https://github.com/storytold/x/pull/1".into(),
+        html_url: format!("https://github.com/Kojalytics/{id}/releases/tag/v{v}"),
+        notes: "## What's Changed\n* Faster things by @a in https://github.com/Kojalytics/x/pull/1".into(),
         prerelease: false,
         assets: vec![Asset {
             name: name.clone(),
             size: 150 << 20,
-            url: format!("https://github.com/storytold/{id}/releases/download/v{v}/{name}"),
+            url: format!("https://github.com/Kojalytics/{id}/releases/download/v{v}/{name}"),
             sha256: None,
         }],
     }
@@ -83,10 +83,10 @@ fn events() -> Vec<Event> {
         ev.push(Event::Latest {
             app: (*id).into(),
             latest: LatestRelease::Found(release(id, v, NOW - 86_400 - i as i64 * 600)),
-            from: Origin::ArtCraftApi,
+            from: Origin::KojalyticsApi,
         });
     }
-    ev.push(Event::Latest { app: "soundcraft".into(), latest: LatestRelease::None, from: Origin::ArtCraftApi });
+    ev.push(Event::Latest { app: "soundcraft".into(), latest: LatestRelease::None, from: Origin::KojalyticsApi });
     let installed = [("photocraft", "0.4.1"), ("lightcraft", "0.4.0"), ("wordcraft", "0.3.0"), ("effectcraft", "0.5.0")];
     for app in &SUITE {
         let inst = installed.iter().find(|(id, _)| *id == app.id).map(|(_, v)| Installed {
@@ -166,7 +166,7 @@ fn german_switches_persists_and_keeps_install_actions() {
     h.get_by_label("Fertig").click();
     h.run_steps(3);
     h.get_by_label("Bildbearbeitung");
-    h.get_by_label_contains("Zuletzt geprüft: vor 3 Min. · über ArtCraft API");
+    h.get_by_label_contains("Zuletzt geprüft: vor 3 Min. · über Kojalytics API");
     h.get_by_label("Auf 0.5.0 aktualisieren");
     // Product names stay in English.
     h.get_by_label("Launcher");
@@ -190,7 +190,7 @@ fn german_switches_persists_and_keeps_install_actions() {
         for label in ["Grid", "Table", "Settings", "Check for updates"] {
             let rect = web.get_by_label(artcraft_launcher_ui_egui::i18n::t(label)).rect();
             assert!(rect.left() >= 0.0 && rect.right() <= width, "{width}: {label} {rect:?}");
-            for label in ["Launcher", "Craft App Suite"] {
+            for label in ["Launcher", "Koja App Suite"] {
                 if let Some(text) = web.query_by_label(label) {
                     assert!(!rect.intersects(text.rect()), "{width}: {label} overlaps {rect:?}");
                 }

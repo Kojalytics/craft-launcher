@@ -55,13 +55,13 @@ fn release(id: &str, v: &str, at: i64) -> Release {
         version: version::parse(v),
         name: format!("v{v}"),
         published_at: Some(at),
-        html_url: format!("https://github.com/storytold/{id}/releases/tag/v{v}"),
+        html_url: format!("https://github.com/Kojalytics/{id}/releases/tag/v{v}"),
         notes: String::new(),
         prerelease: false,
         assets: vec![Asset {
             name: name.clone(),
             size: 150 << 20,
-            url: format!("https://github.com/storytold/{id}/releases/download/v{v}/{name}"),
+            url: format!("https://github.com/Kojalytics/{id}/releases/download/v{v}/{name}"),
             sha256: None,
         }],
     }
@@ -71,7 +71,7 @@ fn events() -> Vec<Event> {
     let mut ev = Vec::new();
     for (i, app) in SUITE.iter().enumerate() {
         let latest = LatestRelease::Found(release(app.id, "0.5.0", NOW - 40 * 86_400 - i as i64 * 600));
-        ev.push(Event::Latest { app: app.id.into(), latest, from: Origin::ArtCraftApi });
+        ev.push(Event::Latest { app: app.id.into(), latest, from: Origin::KojalyticsApi });
         let installed = matches!(app.id, "photocraft" | "lightcraft").then(|| Installed {
             version: version::parse(if app.id == "photocraft" { "0.4.1" } else { "0.5.0" }),
             source: InstallSource::MacApp,
@@ -83,7 +83,7 @@ fn events() -> Vec<Event> {
     ev.push(Event::Progress { app: "filmcraft".into(), phase: JobPhase::Verifying });
     ev.push(Event::CheckFinished { at: NOW - 180, source: Source::Feed, rate_limited_until: None });
     // A backend message, translated through its `@msg` template where it's shown.
-    ev.push(Event::JobFinished { app: "lightcraft".into(), result: Ok("LightCraft updated to 0.5.0".into()) });
+    ev.push(Event::JobFinished { app: "lightcraft".into(), result: Ok("LightKoja updated to 0.5.0".into()) });
     ev
 }
 
@@ -126,12 +126,12 @@ fn hungarian_ui_translates_labels_dates_and_messages() {
     snapshot(&mut h, "grid-hu-dark");
     // Product names stay in English.
     h.get_by_label("Launcher");
-    h.get_by_label("Craft App Suite");
+    h.get_by_label("Koja App Suite");
     h.get_by_label("Képszerkesztés");
     h.get_by_label("Frissítés: 0.5.0");
     h.get_by_label_contains("Ellenőrzőösszeg ellenőrzése…");
-    h.get_by_label_contains("Ellenőrizve: 3 perce · ArtCraft API");
-    h.get_by_label("LightCraft frissítve. Verzió: 0.5.0");
+    h.get_by_label_contains("Ellenőrizve: 3 perce · Kojalytics API");
+    h.get_by_label("LightKoja frissítve. Verzió: 0.5.0");
 
     let mut table = harness(ViewMode::Table);
     table.run_steps(8);
@@ -152,7 +152,7 @@ fn check_settings_layout() {
         h.run_steps(8);
         let screen = egui::Rect::from_min_size(egui::Pos2::ZERO, egui::vec2(width, height));
         let done = h.get_by_label("Kész").rect();
-        let quit = h.get_by_label("Kilépés az ArtCraft Launcherből").rect();
+        let quit = h.get_by_label("Kilépés az Kojalytics Launcherből").rect();
         assert!(screen.contains_rect(done), "{width}x{height}: Done is clipped: {done:?}");
         assert!(screen.contains_rect(quit), "{width}x{height}: Quit is clipped: {quit:?}");
         assert!(!done.intersects(quit));
@@ -162,16 +162,17 @@ fn check_settings_layout() {
         h.run_steps(8);
         // The footer has the same services, and the cards behind the modal have Webhely and GitHub
         // links as one 14px line of text; keep only the settings body's buttons (34px) and icons (24px).
-        let discord = h.get_by_label("Csatlakozás a Discordhoz").rect();
         let theme = h.get_by_label("Rendszerbeállítás szerint").rect();
-        assert!(screen.contains_rect(discord), "community links must be reachable by scrolling");
+        let website =
+            h.query_all_by_label("Webhely").map(|n| n.rect()).filter(|r| r.height() > 20.0 && r.bottom() < theme.top()).last().unwrap();
+        assert!(screen.contains_rect(website), "community links must be reachable by scrolling");
         assert!(theme.bottom() < done.top(), "appearance controls must scroll above the fixed actions");
-        let mut links = vec![discord];
-        for label in ["Webhely", "GitHub", "X", "Instagram", "LinkedIn", "YouTube", "TikTok"] {
+        let mut links = vec![website];
+        for label in ["GitHub"] {
             let candidates: Vec<_> = h
                 .query_all_by_label(label)
                 .map(|n| n.rect())
-                .filter(|r| r.top() >= discord.top() - 1.0 && r.bottom() < theme.top() && r.height() > 20.0)
+                .filter(|r| r.top() >= website.top() - 1.0 && r.bottom() < theme.top() && r.height() > 20.0)
                 .collect();
             assert_eq!(candidates.len(), 1, "{width}x{height}: settings link {label}: {candidates:?}");
             links.extend(candidates);

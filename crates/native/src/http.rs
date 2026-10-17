@@ -9,7 +9,7 @@ use std::time::Duration;
 
 use sha2::{Digest, Sha256};
 
-const USER_AGENT: &str = concat!("ArtCraftLauncher/", env!("CARGO_PKG_VERSION"));
+const USER_AGENT: &str = concat!("KojalyticsLauncher/", env!("CARGO_PKG_VERSION"));
 /// Largest JSON or text answer we read.
 const MAX_SMALL: u64 = 4 << 20;
 
@@ -32,14 +32,14 @@ pub enum Fetched {
 #[derive(Clone)]
 pub struct Http {
     small: ureq::Agent,
-    /// ArtCraft's release feed: a short timeout, so a slow server never holds up a check.
+    /// Kojalytics's release feed: a short timeout, so a slow server never holds up a check.
     feed: ureq::Agent,
     no_redirect: ureq::Agent,
     download: ureq::Agent,
     token: Option<String>,
 }
 
-/// Why ArtCraft's release feed couldn't be read.
+/// Why Kojalytics's release feed couldn't be read.
 #[derive(Debug)]
 pub struct FeedError {
     pub why: String,
@@ -137,7 +137,7 @@ impl Http {
         }
     }
 
-    /// ArtCraft's release feed, or why it couldn't be read. Never takes more than ~10 seconds.
+    /// Kojalytics's release feed, or why it couldn't be read. Never takes more than ~10 seconds.
     pub fn get_feed(&self, url: &str) -> Result<String, FeedError> {
         let failed = |why: String| FeedError { why, throttled: false, retry_after: None };
         let mut resp =
@@ -820,10 +820,10 @@ pub(crate) mod tests {
     #[ignore = "needs network access"]
     fn downloads_a_real_release_asset() {
         let http = Http::new().unwrap();
-        let Fetched::Body { text, .. } = http.get_api("https://api.github.com/repos/storytold/wordcraft/releases/latest", None).unwrap() else {
+        let Fetched::Body { text, .. } = http.get_api("https://api.github.com/repos/Kojalytics/wordcraft/releases/latest", None).unwrap() else {
             panic!("no release")
         };
-        let release = artcraft_launcher_core::release::parse_github_release(&text, "storytold/wordcraft").unwrap();
+        let release = artcraft_launcher_core::release::parse_github_release(&text, "Kojalytics/wordcraft").unwrap();
         let sums_url = &release.sums_asset().unwrap().url;
         let sums = artcraft_launcher_core::release::parse_sha256sums(&http.get_text(sums_url).unwrap().unwrap());
         let asset = release.assets.iter().find(|a| a.name.ends_with("freebsd-x86_64.tar.gz")).unwrap();
@@ -837,7 +837,7 @@ pub(crate) mod tests {
     /// Answers one request with `head` (status line and headers) and an empty body.
     fn answer_once(head: String) -> String {
         let listener = TcpListener::bind("127.0.0.1:0").unwrap();
-        let url = format!("http://{}/repos/storytold/photocraft/releases/latest", listener.local_addr().unwrap());
+        let url = format!("http://{}/repos/Kojalytics/photocraft/releases/latest", listener.local_addr().unwrap());
         std::thread::spawn(move || {
             let Ok((mut stream, _)) = listener.accept() else { return };
             let mut reader = BufReader::new(stream.try_clone().unwrap());

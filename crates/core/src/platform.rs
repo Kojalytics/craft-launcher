@@ -263,7 +263,7 @@ mod tests {
         {
             assert_eq!(parse_asset_name(other, &["photocraft"]), None, "{other}");
         }
-        // FigCraft also ships its collaboration server; that tarball is not the app.
+        // FigKoja also ships its collaboration server; that tarball is not the app.
         assert_eq!(parse_asset_name("figcraft-server-0.5.1-linux-x86_64.tar.gz", &["figcraft"]), None);
         assert!(parse_asset_name("figcraft-0.5.1-linux-x86_64.tar.gz", &["figcraft"]).is_some());
     }

@@ -404,7 +404,7 @@ mod tests {
         let personal = parent.join("photocraft").join("settings.json");
         std::fs::write(&personal, b"personal").unwrap();
         for (version, exe) in [("0.6.0", b"new".as_slice()), ("0.4.0", b"older".as_slice())] {
-            let executable = if version == "0.4.0" { "PhotoCraft.exe" } else { "photocraft.exe" };
+            let executable = if version == "0.4.0" { "PhotoKoja.exe" } else { "photocraft.exe" };
             let package = archive(dir.path(), "next.zip", &[(executable, exe), ("lib/runtime.dll", b"dll")]);
             record = install(app, &package, version, Some(&record), &paths, Some(&dir.path().join("Ignored")), false, &mut |_| Ok(())).unwrap();
             assert_eq!(std::fs::read(&record.path).unwrap(), exe);
@@ -477,7 +477,7 @@ mod tests {
         for (name, files) in [
             ("traversal.zip", vec![("../escape.exe", b"bad".as_slice())]),
             ("colon.zip", vec![("data:stream", b"bad".as_slice())]),
-            ("duplicate.zip", vec![("PhotoCraft.exe", b"one".as_slice()), ("photocraft.exe", b"two".as_slice())]),
+            ("duplicate.zip", vec![("PhotoKoja.exe", b"one".as_slice()), ("photocraft.exe", b"two".as_slice())]),
         ] {
             let zip = archive(dir.path(), name, &files);
             let output = dir.path().join(name.replace('.', "-"));

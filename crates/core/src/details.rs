@@ -50,7 +50,7 @@ const fn feature(title: &'static str, text: &'static str) -> Feature {
 /// Pinned to a tag (`SCREENSHOTS_REV`) so that what a launcher fetches never changes under it, and
 /// so that a saved copy never goes stale. To change a picture, publish a new tag and bump the
 /// revision: older launchers keep working from the tag they know.
-pub const SCREENSHOTS_BASE: &str = "https://raw.githubusercontent.com/storytold/craft-launcher-assets";
+pub const SCREENSHOTS_BASE: &str = "https://raw.githubusercontent.com/Kojalytics/craft-launcher-assets";
 
 /// The tag of the pictures repository the launcher reads. Also part of the saved copies' path.
 pub const SCREENSHOTS_REV: &str = "v1";
@@ -64,7 +64,7 @@ pub fn looks_like_jpeg(bytes: &[u8]) -> bool {
     bytes.starts_with(&[0xFF, 0xD8, 0xFF])
 }
 
-/// Where every Craft App runs (getartcraft.com lists the same for each of them).
+/// Where every Craft App runs (kojalytics.com lists the same for each of them).
 const PLATFORMS: &str = "macOS, Windows, Linux, FreeBSD, web";
 
 pub const DETAILS: [AppDetails; 13] = [
@@ -73,7 +73,7 @@ pub const DETAILS: [AppDetails; 13] = [
         headline: "The image editor you already know how to use.",
         about: "Layers, masks, adjustment layers, layer styles, type, vectors and brushes in a native app \
             written in Rust. Open source, offline, and yours.\n\n\
-            PhotoCraft keeps the menus, shortcuts and panels your hands already know, so there is \
+            PhotoKoja keeps the menus, shortcuts and panels your hands already know, so there is \
             nothing to relearn.",
         features: &[
             feature("Native GPU canvas", "No Electron and no web view: a fast native compositor."),
@@ -448,7 +448,7 @@ mod tests {
         let page = AppDetails::by_id("photocraft").unwrap();
         assert_eq!(
             page.screenshot_url("demo").as_deref(),
-            Some("https://raw.githubusercontent.com/storytold/craft-launcher-assets/v1/photocraft/demo.jpg")
+            Some("https://raw.githubusercontent.com/Kojalytics/craft-launcher-assets/v1/photocraft/demo.jpg")
         );
         for key in ["", "nope", "../vectorcraft/neon", "demo/../masks", "demo.jpg", "/etc/passwd", "demo?x=1", "demo#"] {
             assert_eq!(page.screenshot_url(key), None, "{key:?}");

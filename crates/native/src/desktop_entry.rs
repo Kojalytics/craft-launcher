@@ -2,7 +2,7 @@
 //!
 //! An AppImage installs nothing by itself, so without an entry the app is missing from the
 //! desktop's menu and, on Wayland, the dock can't match the window's app id to an icon. The
-//! launcher writes `<data>/applications/ai.storyteller.<app>.desktop` (the id each app's window
+//! launcher writes `<data>/applications/com.kojalytics.<app>.desktop` (the id each app's window
 //! reports) and marks it as its own, so it only ever replaces or removes entries it wrote.
 //!
 //! The text is built by pure functions, tested on every platform; only Linux writes the files.
@@ -14,7 +14,7 @@ use std::path::Path;
 use artcraft_launcher_core::CraftApp;
 
 /// The key that marks an entry as written by the launcher.
-pub const MARKER: &str = "X-ArtCraft-Launcher=true";
+pub const MARKER: &str = "X-Kojalytics-Launcher=true";
 
 /// The menu categories and the window class each app's own `.desktop` file declares.
 pub fn meta(app: &CraftApp) -> (&'static str, Option<&'static str>) {
@@ -144,17 +144,17 @@ mod tests {
     fn writes_a_complete_entry() {
         let text = render(app("photocraft"), Path::new("/home/ana/Applications/photocraft-0.6.0-linux-x86_64.AppImage"), true).unwrap();
         let expected = format!(
-            "[Desktop Entry]\nType=Application\nName=PhotoCraft\nComment={}\n\
+            "[Desktop Entry]\nType=Application\nName=PhotoKoja\nComment={}\n\
              Exec=\"/home/ana/Applications/photocraft-0.6.0-linux-x86_64.AppImage\" %F\n\
-             Icon=ai.storyteller.photocraft\nTerminal=false\nCategories=Graphics;2DGraphics;RasterGraphics;Photography;\n\
-             StartupWMClass=photocraft\nX-ArtCraft-Launcher=true\n",
+             Icon=com.kojalytics.photocraft\nTerminal=false\nCategories=Graphics;2DGraphics;RasterGraphics;Photography;\n\
+             StartupWMClass=photocraft\nX-Kojalytics-Launcher=true\n",
             app("photocraft").tagline
         );
         assert_eq!(text, expected);
         assert!(is_ours(&text));
         let no_icon = render(app("wordcraft"), Path::new("/x/w.AppImage"), false).unwrap();
         assert!(!no_icon.contains("Icon="));
-        assert!(no_icon.contains("StartupWMClass=ai.storyteller.wordcraft\n"));
+        assert!(no_icon.contains("StartupWMClass=com.kojalytics.wordcraft\n"));
         assert!(no_icon.contains("Categories=Office;WordProcessor;\n"));
     }
 
@@ -173,8 +173,8 @@ mod tests {
             let text = render(app("gridcraft"), Path::new(p), false).unwrap();
             assert_eq!(exec_program(&text).map(PathBuf::from), Some(PathBuf::from(p)), "{p}");
         }
-        // PhotoCraft's AppRun writes its own entry, unmarked.
-        let theirs = "[Desktop Entry]\nName=PhotoCraft\nExec=\"/home/ana/Applications/photocraft-0.5.0-linux-x86_64.AppImage\" %F\n";
+        // PhotoKoja's AppRun writes its own entry, unmarked.
+        let theirs = "[Desktop Entry]\nName=PhotoKoja\nExec=\"/home/ana/Applications/photocraft-0.5.0-linux-x86_64.AppImage\" %F\n";
         assert_eq!(exec_program(theirs).as_deref(), Some("/home/ana/Applications/photocraft-0.5.0-linux-x86_64.AppImage"));
         assert!(!is_ours(theirs));
         assert_eq!(exec_program("[Desktop Entry]\nExec=photocraft %F\n").as_deref(), Some("photocraft"));

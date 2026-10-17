@@ -125,13 +125,13 @@ fn release(id: &str, v: &str, at: i64) -> Release {
         version: version::parse(v),
         name: format!("v{v}"),
         published_at: Some(at),
-        html_url: format!("https://github.com/storytold/{id}/releases/tag/v{v}"),
-        notes: "## What's Changed\n* Faster things by @a in https://github.com/storytold/x/pull/1".into(),
+        html_url: format!("https://github.com/Kojalytics/{id}/releases/tag/v{v}"),
+        notes: "## What's Changed\n* Faster things by @a in https://github.com/Kojalytics/x/pull/1".into(),
         prerelease: false,
         assets: vec![Asset {
             name: name.clone(),
             size: 150 << 20,
-            url: format!("https://github.com/storytold/{id}/releases/download/v{v}/{name}"),
+            url: format!("https://github.com/Kojalytics/{id}/releases/download/v{v}/{name}"),
             sha256: None,
         }],
     }
@@ -157,10 +157,10 @@ fn events() -> Vec<Event> {
         ev.push(Event::Latest {
             app: (*id).into(),
             latest: LatestRelease::Found(release(id, v, NOW - 86_400 - i as i64 * 600)),
-            from: Origin::ArtCraftApi,
+            from: Origin::KojalyticsApi,
         });
     }
-    ev.push(Event::Latest { app: "soundcraft".into(), latest: LatestRelease::None, from: Origin::ArtCraftApi });
+    ev.push(Event::Latest { app: "soundcraft".into(), latest: LatestRelease::None, from: Origin::KojalyticsApi });
     let installed = [("photocraft", "0.4.1"), ("lightcraft", "0.4.0"), ("wordcraft", "0.3.0"), ("effectcraft", "0.5.0")];
     for app in &SUITE {
         let inst = installed.iter().find(|(id, _)| *id == app.id).map(|(_, v)| Installed {
@@ -328,10 +328,10 @@ fn a_fresh_install_confirms_the_folder_and_configures_before_installing() {
     h.run_steps(4);
     h.get_by_label("Browse…").scroll_to_me();
     h.run_steps(4);
-    *picked.borrow_mut() = Some("/Volumes/Craft Apps".into());
+    *picked.borrow_mut() = Some("/Volumes/Koja Apps".into());
     h.get_by_label("Browse…").click();
     h.run_steps(3);
-    assert_eq!(h.state().as_ref().unwrap().settings.install_locations.root.as_deref(), Some("/Volumes/Craft Apps"));
+    assert_eq!(h.state().as_ref().unwrap().settings.install_locations.root.as_deref(), Some("/Volumes/Koja Apps"));
     h.get_by_label("Done").click();
     h.run_steps(3);
     sent.borrow_mut().clear();
@@ -360,7 +360,7 @@ fn a_fresh_install_confirms_the_folder_and_configures_before_installing() {
     h.run_steps(2);
     let commands = install_commands(&sent);
     assert!(matches!(commands.first(), Some(Command::Configure(options))
-        if options.install_locations.root.as_deref() == Some("/Volumes/Craft Apps")
+        if options.install_locations.root.as_deref() == Some("/Volumes/Koja Apps")
         && options.install_locations.folder("photocraft") == Some("/Volumes/Typed Photo")));
     assert_eq!(commands.get(1), Some(&Command::Install { app: "photocraft".into() }));
 }
@@ -370,7 +370,7 @@ fn use_default_removes_an_app_override_and_settings_can_reset_the_root() {
     let picked = Rc::new(RefCell::new(Some("/Volumes/Photo".into())));
     let (mut h, sent) = folder_harness(picked);
     h.run_steps(8);
-    h.state_mut().as_mut().unwrap().settings.install_locations.root = Some("/Volumes/Craft Apps".into());
+    h.state_mut().as_mut().unwrap().settings.install_locations.root = Some("/Volumes/Koja Apps".into());
     h.state_mut().as_mut().unwrap().settings.install_locations.per_app.insert("photocraft".into(), "/Volumes/Old Photo".into());
     h.run_steps(2);
     h.get_by_label("Install").click();
@@ -382,7 +382,7 @@ fn use_default_removes_an_app_override_and_settings_can_reset_the_root() {
     h.run_steps(2);
     assert!(h.state().as_ref().unwrap().settings.install_locations.per_app.is_empty());
     assert!(
-        matches!(install_commands(&sent).first(), Some(Command::Configure(options)) if options.install_locations.folder("photocraft") == Some("/Volumes/Craft Apps"))
+        matches!(install_commands(&sent).first(), Some(Command::Configure(options)) if options.install_locations.folder("photocraft") == Some("/Volumes/Koja Apps"))
     );
     h.get_by_label("Settings").click();
     h.run_steps(3);
@@ -427,11 +427,11 @@ fn install_locations_survive_settings_save_and_older_settings_use_system_default
     assert!(old.auto_update);
     assert_eq!(old.install_locations, Default::default());
     let mut settings = old;
-    settings.install_locations.root = Some("/Volumes/Craft Apps".into());
+    settings.install_locations.root = Some("/Volumes/Koja Apps".into());
     settings.install_locations.per_app.insert("photocraft".into(), "/Volumes/Photo".into());
     let restored: Settings = serde_json::from_str(&serde_json::to_string(&settings).unwrap()).unwrap();
     assert_eq!(restored.install_locations.folder("photocraft"), Some("/Volumes/Photo"));
-    assert_eq!(restored.install_locations.folder("filmcraft"), Some("/Volumes/Craft Apps"));
+    assert_eq!(restored.install_locations.folder("filmcraft"), Some("/Volumes/Koja Apps"));
 }
 
 #[test]
@@ -477,7 +477,7 @@ fn grid_shows_every_status_and_installs_on_click() {
     h.get_by_label_contains("0.4.1 installed → 0.5.0 released");
     // The window has no title bar of its own here (the web build, and the tests).
     assert!(h.query_by_label("Close").is_none());
-    assert!(h.query_all_by_label_contains("Discord").count() >= 2); // header link and footer link
+    assert_eq!(h.query_all_by_label_contains("Discord").count(), 0); // no Discord links in the Kojalytics build
     assert!(h.query_all_by_label("Coming soon").count() >= 1);
     h.get_by_label_contains("48 MB of 131 MB");
     h.get_by_label("Update all (2)").click();
@@ -580,8 +580,8 @@ fn a_kept_update_names_its_version_and_an_up_to_date_app_is_not_downloaded_again
     h.get_by_label("Retry update to 0.6.0").click();
     h.run_steps(2);
     assert_eq!(*sent.borrow(), [Command::Install { app: "effectcraft".into() }]);
-    // WordCraft is up to date: its menu offers Reinstall, which uses the kept file.
-    let row = h.get_all_by_label("WordCraft").next().unwrap().rect().center().y;
+    // WordKoja is up to date: its menu offers Reinstall, which uses the kept file.
+    let row = h.get_all_by_label("WordKoja").next().unwrap().rect().center().y;
     h.get_all_by_label("…").find(|n| (n.rect().center().y - row).abs() < 25.0).unwrap().click();
     h.run_steps(3);
     h.get_by_label("Reinstall");
@@ -659,26 +659,26 @@ fn table_view_and_light_theme() {
 fn hiding_an_app_removes_it_until_it_is_unhidden() {
     let (mut h, _) = harness(ViewMode::Table, egui::Theme::Dark, true);
     h.run_steps(6);
-    // PhotoCraft has an update, so hiding it also drops the Updates count.
+    // PhotoKoja has an update, so hiding it also drops the Updates count.
     h.get_by_label_contains("Updates 2");
-    let row = h.get_all_by_label("PhotoCraft").next().unwrap().rect().center().y;
+    let row = h.get_all_by_label("PhotoKoja").next().unwrap().rect().center().y;
     h.get_all_by_label("…").find(|n| (n.rect().center().y - row).abs() < 25.0).unwrap().click();
     h.run_steps(3);
     h.get_by_label("Hide App").click();
     h.run_steps(4);
-    assert!(h.query_by_label("PhotoCraft").is_none());
+    assert!(h.query_by_label("PhotoKoja").is_none());
     assert!(h.state().as_ref().unwrap().settings.hidden.contains("photocraft"));
     h.get_by_label_contains("Updates 1");
     h.get_by_label_contains("Hidden Apps").click();
     h.run_steps(4);
-    h.get_by_label("PhotoCraft");
-    assert!(h.query_by_label("WordCraft").is_none());
-    let row = h.get_all_by_label("PhotoCraft").next().unwrap().rect().center().y;
+    h.get_by_label("PhotoKoja");
+    assert!(h.query_by_label("WordKoja").is_none());
+    let row = h.get_all_by_label("PhotoKoja").next().unwrap().rect().center().y;
     h.get_all_by_label("…").find(|n| (n.rect().center().y - row).abs() < 25.0).unwrap().click();
     h.run_steps(3);
     h.get_by_label("Unhide App").click();
     h.run_steps(4);
-    h.get_by_label("PhotoCraft");
+    h.get_by_label("PhotoKoja");
     assert!(h.query_by_label_contains("Hidden Apps").is_none());
     assert!(h.state().as_ref().unwrap().settings.hidden.is_empty());
     assert_eq!(h.state().as_ref().unwrap().settings.filter, artcraft_launcher_ui_egui::settings::Filter::All);
@@ -694,8 +694,8 @@ fn switching_views_and_filters() {
     h.get_by_label_contains("Updates").click();
     h.run_steps(4);
     snapshot(&mut h, "table-updates-dark");
-    assert!(h.query_by_label("WordCraft").is_none());
-    h.get_by_label("PhotoCraft");
+    assert!(h.query_by_label("WordKoja").is_none());
+    h.get_by_label("PhotoKoja");
 }
 
 /// How far the middle of these lines of text is below the middle of the app icon beside them, in points.
@@ -717,12 +717,12 @@ fn name_and_tagline_are_centred_on_the_icon() {
         let (mut h, _) = harness_at(ViewMode::Grid, egui::Theme::Dark, true, scale);
         h.run_steps(8);
         snapshot(&mut h, &format!("grid-dark{suffix}"));
-        let off = below_icon_centre(&h, &["PhotoCraft", "Image editing"]);
+        let off = below_icon_centre(&h, &["PhotoKoja", "Image editing"]);
         assert!(off.abs() < 0.25, "grid at {scale}x: {off}");
         let (mut h, _) = harness_at(ViewMode::Table, egui::Theme::Light, true, scale);
         h.run_steps(8);
         snapshot(&mut h, &format!("table-light{suffix}"));
-        let off = below_icon_centre(&h, &["PhotoCraft", "Image editing"]);
+        let off = below_icon_centre(&h, &["PhotoKoja", "Image editing"]);
         assert!(off.abs() < 0.25, "table at {scale}x: {off}");
     }
 }
@@ -753,17 +753,17 @@ fn every_table_column_sorts_both_ways() {
     h.get_by_label("Installed").click();
     h.run_steps(3);
     let o = order(&h);
-    assert_eq!(&o[..4], ["EffectCraft", "PhotoCraft", "LightCraft", "WordCraft"], "{o:?}");
+    assert_eq!(&o[..4], ["EffectKoja", "PhotoKoja", "LightKoja", "WordKoja"], "{o:?}");
     // Reversed: lowest first, the empty cells still last.
     h.get_by_label("Installed").click();
     h.run_steps(3);
     let o = order(&h);
-    assert_eq!(&o[..4], ["WordCraft", "LightCraft", "PhotoCraft", "EffectCraft"], "{o:?}");
-    // Latest: highest version first, SoundCraft (no release) last.
+    assert_eq!(&o[..4], ["WordKoja", "LightKoja", "PhotoKoja", "EffectKoja"], "{o:?}");
+    // Latest: highest version first, SoundKoja (no release) last.
     h.get_by_label("Latest").click();
     h.run_steps(3);
     let o = order(&h);
-    assert_eq!(o.first().map(String::as_str), Some("VectorCraft"), "{o:?}"); // 0.7.0
+    assert_eq!(o.first().map(String::as_str), Some("VectorKoja"), "{o:?}"); // 0.7.0
     snapshot(&mut h, "table-sorted-latest");
     // App: Z to A on the second click.
     h.get_by_label("App").click();
@@ -771,19 +771,18 @@ fn every_table_column_sorts_both_ways() {
     h.get_by_label("App").click();
     h.run_steps(3);
     let o = order(&h);
-    assert_eq!(o.first().map(String::as_str), Some("WordCraft"), "{o:?}");
+    assert_eq!(o.first().map(String::as_str), Some("WordKoja"), "{o:?}");
 }
 
 #[test]
-fn settings_link_to_discord() {
+fn settings_has_no_discord_link() {
     let (mut h, _) = harness(ViewMode::Grid, egui::Theme::Dark, true);
     h.run_steps(6);
     h.get_by_label("Settings").click();
     h.run_steps(4);
     snapshot(&mut h, "settings-dark");
-    h.get_by_label("Questions, ideas and news from the ArtCraft team");
-    // The header button and the one in Settings.
-    assert!(h.query_all_by_label_contains("Discord").count() >= 2);
+    h.get_by_label("Questions, ideas and news from the Kojalytics team");
+    assert_eq!(h.query_all_by_label_contains("Discord").count(), 0);
 }
 
 #[test]
@@ -795,7 +794,7 @@ fn the_uninstall_prompt_keeps_its_own_size_after_a_taller_dialog() {
     h.run_steps(4);
     h.get_by_label("Done").click();
     h.run_steps(3);
-    // PhotoCraft is installed, so its … menu offers Uninstall.
+    // PhotoKoja is installed, so its … menu offers Uninstall.
     h.get_all_by_label("…").next().unwrap().click();
     h.run_steps(3);
     h.get_by_label("Uninstall…").click();
@@ -815,11 +814,11 @@ fn the_uninstall_prompt_keeps_its_own_size_after_a_taller_dialog() {
 fn links_to_the_website_github_and_each_apps_pages() {
     let (mut h, _) = harness(ViewMode::Grid, egui::Theme::Dark, true);
     h.run_steps(6);
-    // Footer: website, GitHub and Discord.
-    for label in ["Website", "GitHub", "Discord"] {
+    // Footer: website and GitHub.
+    for label in ["Website", "GitHub"] {
         assert!(h.query_all_by_label(label).count() >= 1, "{label}");
     }
-    // Cards: every app links to its repo and to its own page on getartcraft.com (plus the footer's).
+    // Cards: every app links to its repo and to its own page on kojalytics.com (plus the footer's).
     let shown_cards = h.query_all_by_label("GitHub").count() - 1;
     let shown_sites = h.query_all_by_label("Website").count() - 1;
     assert!(shown_cards >= 13, "{shown_cards}");
@@ -827,10 +826,10 @@ fn links_to_the_website_github_and_each_apps_pages() {
     // The table's … menu has the app's website and GitHub repo.
     let (mut h, _) = harness(ViewMode::Table, egui::Theme::Dark, true);
     h.run_steps(6);
-    h.get_all_by_label("…").nth(7).unwrap().click(); // WordCraft
+    h.get_all_by_label("…").nth(7).unwrap().click(); // WordKoja
     h.run_steps(3);
     h.get_by_label("GitHub repository");
-    // The footer's Website link and WordCraft's now-live one in the menu.
+    // The footer's Website link and WordKoja's now-live one in the menu.
     assert!(h.query_all_by_label_contains("Website").count() >= 2);
 }
 
@@ -864,24 +863,17 @@ fn all_opened(h: &mut Harness<'_, Option<LauncherUi>>, label: &str) -> Vec<Strin
 fn links_open_the_right_pages() {
     let (mut h, _) = harness(ViewMode::Grid, egui::Theme::Dark, true);
     h.run_steps(6);
-    assert_eq!(click_opens(&mut h, "Discord").as_deref(), Some("https://discord.gg/artcraft"));
-    // The footer's ArtCraft links and each card's own pages.
+    // The footer's Kojalytics links and each card's own pages.
     let github = all_opened(&mut h, "GitHub");
-    assert!(github.contains(&"https://github.com/storytold".to_string()), "{github:?}");
-    assert!(github.contains(&"https://github.com/storytold/photocraft".to_string()), "{github:?}");
+    assert!(github.contains(&"https://github.com/Kojalytics".to_string()), "{github:?}");
+    assert!(github.contains(&"https://github.com/Kojalytics/photocraft".to_string()), "{github:?}");
     let sites = all_opened(&mut h, "Website");
-    assert!(sites.contains(&"https://getartcraft.com".to_string()), "{sites:?}");
-    assert!(sites.contains(&"https://getartcraft.com/apps/photocraft".to_string()), "{sites:?}");
-    // Social icons in the footer.
-    assert_eq!(click_opens(&mut h, "X").as_deref(), Some("https://x.com/get_artcraft"));
-    assert_eq!(click_opens(&mut h, "YouTube").as_deref(), Some("https://www.youtube.com/@OfficialArtcraftStudios"));
-    assert_eq!(click_opens(&mut h, "TikTok").as_deref(), Some("https://www.tiktok.com/@artcraft.studios"));
-    assert_eq!(click_opens(&mut h, "Instagram").as_deref(), Some("https://www.instagram.com/officialartcraftstudios"));
-    assert_eq!(click_opens(&mut h, "LinkedIn").as_deref(), Some("https://www.linkedin.com/company/artcraft-ai"));
+    assert!(sites.contains(&"https://kojalytics.com".to_string()), "{sites:?}");
+    assert!(sites.contains(&"https://kojalytics.com/apps/photocraft".to_string()), "{sites:?}");
     // The … menu.
     h.get_all_by_label("…").next().unwrap().click();
     h.run_steps(3);
-    assert_eq!(click_opens(&mut h, "All releases").as_deref(), Some("https://github.com/storytold/photocraft/releases"));
+    assert_eq!(click_opens(&mut h, "All releases").as_deref(), Some("https://github.com/Kojalytics/photocraft/releases"));
 }
 
 #[test]
@@ -971,7 +963,7 @@ fn the_launcher_updates_itself_and_quits_to_restart() {
         None,
     );
     h.run_steps(6);
-    h.get_by_label_contains("ArtCraft Launcher 0.2.0 is available");
+    h.get_by_label_contains("Kojalytics Launcher 0.2.0 is available");
     h.get_by_label("Update and restart").click();
     h.run_steps(2);
     assert!(sent.borrow().contains(&Command::UpdateLauncher));
@@ -995,7 +987,7 @@ fn launcher_update_prompts_to_relaunch_with_updated_version() {
     let (mut h, _) = harness_with(ev, ViewMode::Grid, egui::Theme::Dark, true, 1.0);
     h.run_steps(6);
     // Dialog pops up on launch with the update prompt
-    h.get_by_label_contains("ArtCraft Launcher 0.2.0 is available");
+    h.get_by_label_contains("Kojalytics Launcher 0.2.0 is available");
     h.get_by_label("A new version is available. Would you like to relaunch with the updated version?");
     h.get_by_label("What's new");
     // Clicking "Later" dismisses the modal dialog
@@ -1031,8 +1023,8 @@ fn feed_announcements_and_alerts_show_until_dismissed() {
     let sent = Rc::new(RefCell::new(Vec::new()));
     let mut evs = events();
     evs.push(Event::Notices {
-        announcements: vec![notice("a1", "CADCraft 1.0 is out", Some("https://getartcraft.com/news"))],
-        alerts: vec![notice("x1", "Security update", Some("https://getartcraft.com/security"))],
+        announcements: vec![notice("a1", "CADKoja 1.0 is out", Some("https://kojalytics.com/news"))],
+        alerts: vec![notice("x1", "Security update", Some("https://kojalytics.com/security"))],
     });
     let mut backend = Some(Fake { events: evs, sent, manage: true, pictures: Rc::default(), asked: Vec::new(), clock: Rc::new(Cell::new(NOW)) });
     let mut h = Harness::builder().with_size(egui::vec2(1180.0, 900.0)).build_ui_state(
@@ -1058,11 +1050,11 @@ fn feed_announcements_and_alerts_show_until_dismissed() {
     assert!(h.query_by_label("Security update").is_none());
     assert!(h.state().as_ref().unwrap().settings.dismissed_notices.contains("x1"));
     // The announcement stays inline until dismissed.
-    h.get_by_label("CADCraft 1.0 is out");
+    h.get_by_label("CADKoja 1.0 is out");
     h.get_by_label("Learn more");
     h.get_all_by_label("Dismiss").next().unwrap().click();
     h.run_steps(4);
-    assert!(h.query_by_label("CADCraft 1.0 is out").is_none());
+    assert!(h.query_by_label("CADKoja 1.0 is out").is_none());
     assert!(h.state().as_ref().unwrap().settings.dismissed_notices.contains("a1"));
 }
 
@@ -1158,10 +1150,10 @@ fn the_footer_names_the_services_behind_what_is_on_screen() {
             h.get_by_label_contains("Checked ").accesskit_node().label().or_else(|| h.get_by_label_contains("Checked ").accesskit_node().value());
         label.unwrap_or_default()
     };
-    assert_eq!(footer(Vec::new()), "Checked 3 min ago · using ArtCraft API");
+    assert_eq!(footer(Vec::new()), "Checked 3 min ago · using Kojalytics API");
     let from_github =
         vec![Event::Latest { app: "wordcraft".into(), latest: LatestRelease::Found(release("wordcraft", "0.3.1", NOW)), from: Origin::GitHub }];
-    assert_eq!(footer(from_github), "Checked 3 min ago · using ArtCraft API and GitHub");
+    assert_eq!(footer(from_github), "Checked 3 min ago · using Kojalytics API and GitHub");
 }
 
 #[test]
@@ -1218,9 +1210,9 @@ fn clicking_a_card_opens_its_details_drawer() {
     let (mut h, _sent) = harness(ViewMode::Grid, egui::Theme::Dark, true);
     h.run_steps(8);
     // Every app has a page: a card of each generation opens one.
-    h.get_by_label("VectorCraft details");
-    h.get_by_label("WordCraft details");
-    h.get_by_label("PhotoCraft details").click();
+    h.get_by_label("VectorKoja details");
+    h.get_by_label("WordKoja details");
+    h.get_by_label("PhotoKoja details").click();
     h.run_steps(10);
     snapshot(&mut h, "details-dark");
     h.get_by_label_contains("The image editor you already know how to use");
@@ -1246,7 +1238,7 @@ fn clicking_a_card_opens_its_details_drawer() {
 fn details_drawer_in_the_light_theme() {
     let (mut h, _sent) = harness(ViewMode::Grid, egui::Theme::Light, true);
     h.run_steps(8);
-    h.get_by_label("PhotoCraft details").click();
+    h.get_by_label("PhotoKoja details").click();
     h.run_steps(10);
     snapshot(&mut h, "details-light");
     h.get_by_label_contains("The image editor you already know how to use");
@@ -1261,26 +1253,26 @@ fn opening_a_page_asks_for_its_pictures_once_and_only_while_it_lacks_some() {
     let (mut h, sent) = harness(ViewMode::Grid, egui::Theme::Dark, true);
     h.run_steps(8);
     assert_eq!(fetches(&sent, "photocraft"), 0, "nothing is fetched before a page is opened");
-    h.get_by_label("PhotoCraft details").click();
+    h.get_by_label("PhotoKoja details").click();
     h.run_steps(10);
     assert_eq!(fetches(&sent, "photocraft"), 1);
     h.get_by_label("Enlarge picture");
     // Closed and opened again: the pictures are in hand, so nothing is asked.
     h.key_press(egui::Key::Escape);
     h.run_steps(10);
-    h.get_by_label("PhotoCraft details").click();
+    h.get_by_label("PhotoKoja details").click();
     h.run_steps(10);
     assert_eq!(fetches(&sent, "photocraft"), 1);
     h.get_by_label("Enlarge picture");
     // Another page asks for its own, and a page without pictures asks for nothing.
     h.key_press(egui::Key::Escape);
     h.run_steps(10);
-    h.get_by_label("VectorCraft details").click();
+    h.get_by_label("VectorKoja details").click();
     h.run_steps(10);
     assert_eq!(fetches(&sent, "vectorcraft"), 1);
     h.key_press(egui::Key::Escape);
     h.run_steps(10);
-    h.get_by_label("PdfCraft details").click();
+    h.get_by_label("PdfKoja details").click();
     h.run_steps(10);
     assert_eq!(fetches(&sent, "pdfcraft"), 0);
 }
@@ -1290,7 +1282,7 @@ fn a_frame_stands_in_for_the_pictures_until_they_arrive() {
     let pictures = Rc::new(Cell::new(Pictures::Silent));
     let (mut h, sent) = harness_pictures(events(), ViewMode::Grid, egui::Theme::Dark, true, 1.0, pictures.clone());
     h.run_steps(8);
-    h.get_by_label("PhotoCraft details").click();
+    h.get_by_label("PhotoKoja details").click();
     h.run_steps(10);
     snapshot(&mut h, "details-loading-dark");
     h.get_by_label("Loading pictures…");
@@ -1313,7 +1305,7 @@ fn offline_the_frame_says_so_and_opening_the_page_again_retries() {
     let pictures = Rc::new(Cell::new(Pictures::Offline));
     let (mut h, sent) = harness_pictures(events(), ViewMode::Grid, egui::Theme::Light, true, 1.0, pictures.clone());
     h.run_steps(8);
-    h.get_by_label("PhotoCraft details").click();
+    h.get_by_label("PhotoKoja details").click();
     h.run_steps(10);
     snapshot(&mut h, "details-offline-light");
     h.get_by_label("Pictures couldn't be loaded. Reopen this page to try again.");
@@ -1324,7 +1316,7 @@ fn offline_the_frame_says_so_and_opening_the_page_again_retries() {
     pictures.set(Pictures::Online);
     h.key_press(egui::Key::Escape);
     h.run_steps(10);
-    h.get_by_label("PhotoCraft details").click();
+    h.get_by_label("PhotoKoja details").click();
     h.run_steps(10);
     assert_eq!(fetches(&sent, "photocraft"), 2);
     h.get_by_label("Enlarge picture");
@@ -1336,7 +1328,7 @@ fn the_enlarged_view_shows_a_frame_for_a_picture_still_missing() {
     let pictures = Rc::new(Cell::new(Pictures::SecondFails));
     let (mut h, _sent) = harness_pictures(events(), ViewMode::Grid, egui::Theme::Dark, true, 1.0, pictures);
     h.run_steps(8);
-    h.get_by_label("PhotoCraft details").click();
+    h.get_by_label("PhotoKoja details").click();
     h.run_steps(10);
     h.get_by_label("Enlarge picture").click();
     h.run_steps(3);
@@ -1355,8 +1347,8 @@ fn the_enlarged_view_shows_a_frame_for_a_picture_still_missing() {
 fn a_page_without_pictures_has_no_gallery() {
     let (mut h, _sent) = harness(ViewMode::Grid, egui::Theme::Dark, true);
     h.run_steps(8);
-    // PdfCraft's screenshots still show its old name (PrintCraft), so its page has none for now.
-    h.get_by_label("PdfCraft details").click();
+    // PdfKoja's screenshots still show its old name (PrintCraft), so its page has none for now.
+    h.get_by_label("PdfKoja details").click();
     h.run_steps(10);
     snapshot(&mut h, "details-no-pictures-dark");
     h.get_by_label_contains("The open-source PDF workbench.");
@@ -1369,7 +1361,7 @@ fn a_page_without_pictures_has_no_gallery() {
 fn the_lead_picture_can_be_enlarged() {
     let (mut h, _sent) = harness(ViewMode::Grid, egui::Theme::Dark, true);
     h.run_steps(8);
-    h.get_by_label("PhotoCraft details").click();
+    h.get_by_label("PhotoKoja details").click();
     h.run_steps(10);
     // The drawer has one "Close (Esc)"; the enlarged view adds its own.
     assert_eq!(h.query_all_by_label("Close (Esc)").count(), 1);
@@ -1391,7 +1383,7 @@ fn the_lead_picture_can_be_enlarged() {
     assert!(h.query_by_label_contains("The image editor you already know").is_none());
 }
 
-/// Every page, whatever it holds: no pictures (PdfCraft), one (DesignCraft) or several. The arrow keys are
+/// Every page, whatever it holds: no pictures (PdfKoja), one (DesignKoja) or several. The arrow keys are
 /// pressed more often than there are pictures, both ways, to wrap around the list and to do nothing on a
 /// page that has one or none; the enlarged view is opened wherever there is a picture to enlarge.
 #[test]
@@ -1443,7 +1435,7 @@ fn every_page_opens_and_pages_through_its_pictures() {
 fn the_drawer_and_the_enlarged_picture_survive_any_window_size() {
     let (mut h, _sent) = harness(ViewMode::Grid, egui::Theme::Dark, true);
     h.run_steps(8);
-    h.get_by_label("PhotoCraft details").click();
+    h.get_by_label("PhotoKoja details").click();
     h.run_steps(10);
     let sizes = [(1180.0, 900.0), (720.0, 500.0), (480.0, 320.0), (320.0, 200.0), (120.0, 90.0), (40.0, 30.0), (4000.0, 2400.0)];
     for zoom in [false, true] {
@@ -1500,13 +1492,12 @@ fn the_rate_limit_notice_never_runs_under_the_footer_links() {
         let checked = h.get_by_label_contains("Checked ").rect();
         // Cut short in a narrow window, but enough of it left to read.
         assert!(notice.width() >= 120.0 && notice.right() <= width, "{width}: notice {notice:?}");
-        // Everything on the footer's right: the three links, the social icons and (when there's
-        // room) the platform.
+        // Everything on the footer's right: the two links and (when there's room) the platform.
         let mut right = Vec::new();
-        for label in ["Website", "GitHub", "Discord", "X", "YouTube", "TikTok", "Instagram", "LinkedIn"] {
+        for label in ["Website", "GitHub"] {
             right.extend(h.query_all_by_label(label).map(|n| n.rect()).filter(|r| (r.center().y - notice.center().y).abs() < 12.0));
         }
-        assert_eq!(right.len(), 8, "{width}: {right:?}");
+        assert_eq!(right.len(), 2, "{width}: {right:?}");
         let platform = h.query_by_label_contains("Installing for").map(|n| n.rect());
         assert_eq!(platform.is_some(), width > 720.0, "{width}: the platform label shows unless the window is narrow");
         right.extend(platform);
@@ -1529,7 +1520,7 @@ fn narrow_header_keeps_the_view_switch_clear_of_brand_text() {
                 for label in ["Grid", "Table", "Settings", "Check for updates"] {
                     let rect = h.get_by_label(label).rect();
                     assert!(rect.left() >= 0.0 && rect.right() <= width, "{bar:?} {width}: {label} {rect:?}");
-                    for label in ["Launcher", "Craft App Suite"] {
+                    for label in ["Launcher", "Koja App Suite"] {
                         if let Some(text) = h.query_by_label(label) {
                             assert!(!rect.intersects(text.rect()), "{bar:?} {width}: {label} overlaps {rect:?}");
                         }
@@ -1543,7 +1534,7 @@ fn narrow_header_keeps_the_view_switch_clear_of_brand_text() {
                 }
                 if width == 1180.0 {
                     h.get_by_label("Launcher");
-                    h.get_by_label("Craft App Suite");
+                    h.get_by_label("Koja App Suite");
                 }
                 if [720.0, 800.0, 1180.0].contains(&width) {
                     snapshot(&mut h, &format!("header-{theme:?}-{bar:?}-{width}"));
@@ -1690,13 +1681,13 @@ fn with_animations_on_hovering_a_card_animates() {
 
 #[test]
 fn an_occupied_folder_asks_before_replacing_it() {
-    let path = "/Volumes/Craft Apps/PhotoCraft.app";
+    let path = "/Volumes/Koja Apps/PhotoKoja.app";
     let mut ev = events();
     ev.push(Event::Occupied { app: "photocraft".into(), path: path.into() });
     ev.push(Event::JobFinished { app: "photocraft".into(), result: Err(format!("{path} already exists")) });
     let (mut h, sent) = harness_with(ev, ViewMode::Grid, egui::Theme::Dark, true, 1.0);
     h.run_steps(6);
-    h.get_by_label(&format!("{path} already exists. Installing PhotoCraft will overwrite it."));
+    h.get_by_label(&format!("{path} already exists. Installing PhotoKoja will overwrite it."));
     assert!(h.query_by_label(&format!("{path} already exists")).is_none());
     sent.borrow_mut().clear();
     h.get_by_label("Replace").click();

@@ -1,6 +1,6 @@
 [package]
 name = "artcraft-launcher"
-description = "ArtCraft Launcher: install, update and open the Craft App Suite"
+description = "Kojalytics Launcher: install, update and open the Koja App Suite"
 version.workspace = true
 edition.workspace = true
 license.workspace = true

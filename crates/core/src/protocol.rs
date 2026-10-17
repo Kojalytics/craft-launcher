@@ -47,7 +47,7 @@ pub enum Command {
     Cancel {
         app: String,
     },
-    /// Download the newer ArtCraft Launcher, put it in place and restart into it.
+    /// Download the newer Kojalytics Launcher, put it in place and restart into it.
     UpdateLauncher,
     /// Fetch the pictures of an app's details page (`core::details`), one [`Event::Screenshot`]
     /// each, the lead picture first. Pictures already saved on this machine arrive without
@@ -133,8 +133,8 @@ pub const INSTALL_CANCELLED: &str = "install cancelled";
 /// Which service an app's release information came from (the footer names them).
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum Origin {
-    /// ArtCraft's release feed (storyteller-web), which polls GitHub for everyone.
-    ArtCraftApi,
+    /// Kojalytics's release feed (storyteller-web), which polls GitHub for everyone.
+    KojalyticsApi,
     /// GitHub directly: the fallback.
     GitHub,
 }
@@ -142,7 +142,7 @@ pub enum Origin {
 impl Origin {
     pub fn label(self) -> &'static str {
         match self {
-            Self::ArtCraftApi => "ArtCraft API",
+            Self::KojalyticsApi => "Kojalytics API",
             Self::GitHub => "GitHub",
         }
     }
@@ -151,7 +151,7 @@ impl Origin {
 /// Where release information came from.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Source {
-    /// ArtCraft's release feed (storyteller-web), which polls GitHub for everyone.
+    /// Kojalytics's release feed (storyteller-web), which polls GitHub for everyone.
     Feed,
     /// The GitHub REST API.
     GitHubApi,
@@ -164,7 +164,7 @@ pub enum Source {
 impl Source {
     pub fn label(self) -> &'static str {
         match self {
-            Self::Feed => "ArtCraft",
+            Self::Feed => "Kojalytics",
             Self::GitHubApi => "GitHub",
             Self::GitHubPages => "GitHub (release pages)",
             Self::Cache => "saved results",
@@ -181,11 +181,11 @@ pub enum Event {
         /// The service this answer came from.
         from: Origin,
     },
-    /// The latest ArtCraft Launcher release, when it's newer than this one.
+    /// The latest Kojalytics Launcher release, when it's newer than this one.
     LauncherUpdate(Release),
     /// The new launcher is in place (or will be, once this one exits): quit now so it can start.
     LauncherRestarting,
-    /// News and alerts from ArtCraft's release feed (replaces any earlier set).
+    /// News and alerts from Kojalytics's release feed (replaces any earlier set).
     Notices {
         announcements: Vec<crate::feed::Notice>,
         alerts: Vec<crate::feed::Notice>,

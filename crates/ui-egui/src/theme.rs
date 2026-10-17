@@ -1,4 +1,4 @@
-//! Colours, type and shapes, matching getartcraft.com: hard edges, hairline rules, Archivo
+//! Colours, type and shapes, matching kojalytics.com: hard edges, hairline rules, Archivo
 //! display type, Inter body text and Geist Mono labels. Widgets read [`Tokens::get`]; nothing
 //! hard-codes a colour.
 
@@ -91,7 +91,7 @@ impl Tokens {
         accent_ink: hex(0x74aaff),
         invert_bg: hex(0xffffff),
         invert_fg: hex(0x0b0b0c),
-        // PdfCraft's and LightCraft's inks, so status colours come from the site's palette.
+        // PdfKoja's and LightKoja's inks, so status colours come from the site's palette.
         good: hex(0x3fd6b8),
         warn: hex(0xffc14d),
         bad: hex(0xff6259),

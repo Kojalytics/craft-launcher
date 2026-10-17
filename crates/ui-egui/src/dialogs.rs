@@ -115,8 +115,8 @@ impl LauncherUi {
     fn launcher_update_dialog(&mut self, ui: &mut egui::Ui, r: &artcraft_launcher_core::Release) -> bool {
         let t = Tokens::get(ui.ctx());
         ui.set_width(480.0f32.min(ui.ctx().content_rect().width() - 80.0));
-        let title = fmt(tl!("ArtCraft Launcher {version} is available."), &[("version", &r.version_label())]);
-        Self::title(ui, Some(crate::icons::artcraft_mark()), &title, "");
+        let title = fmt(tl!("Kojalytics Launcher {version} is available."), &[("version", &r.version_label())]);
+        Self::title(ui, Some(crate::icons::kojalytics_mark()), &title, "");
         ui.label(RichText::new(tl!("A new version is available. Would you like to relaunch with the updated version?")).color(t.muted));
         ui.add_space(14.0);
         let mut close = false;
@@ -267,9 +267,9 @@ impl LauncherUi {
         ui.set_max_height((viewport.height() - 80.0).max(0.0));
         ui.spacing_mut().scroll = egui::style::ScrollStyle { foreground_color: true, ..egui::style::ScrollStyle::solid() };
         let title_top = ui.cursor().top();
-        Self::title(ui, Some(crate::icons::artcraft_mark()), tl!("Settings"), &format!("ArtCraft Launcher {}", env!("CARGO_PKG_VERSION")));
+        Self::title(ui, Some(crate::icons::kojalytics_mark()), tl!("Settings"), &format!("Kojalytics Launcher {}", env!("CARGO_PKG_VERSION")));
         let title_height = ui.cursor().top() - title_top;
-        let quit_width = widgets::button_width(ui, tl!("Quit ArtCraft Launcher"), 0.0);
+        let quit_width = widgets::button_width(ui, tl!("Quit Kojalytics Launcher"), 0.0);
         let done_width = widgets::button_width(ui, tl!("Done"), 90.0);
         let stack_actions = self.caps.manage_apps && quit_width + done_width + ui.spacing().item_spacing.x > ui.available_width();
         let footer_height = if stack_actions { 2.0 * theme::CONTROL_H + ui.spacing().item_spacing.y } else { theme::CONTROL_H };
@@ -281,7 +281,7 @@ impl LauncherUi {
         ui.add_space(24.0);
         let mut close = false;
         let quit = |ui: &mut egui::Ui, host: &mut dyn Host| {
-            if self.caps.manage_apps && widgets::button(ui, tl!("Quit ArtCraft Launcher"), Kind::Secondary, 0.0).clicked() {
+            if self.caps.manage_apps && widgets::button(ui, tl!("Quit Kojalytics Launcher"), Kind::Secondary, 0.0).clicked() {
                 host.quit();
             }
         };
@@ -445,7 +445,7 @@ impl LauncherUi {
                     .on_hover_text(tl!("When on, opening the launcher from the menu bar brings its window to the desktop you're on. When off, macOS switches you to the desktop the window was on."));
             }
             if let Some(mut on) = host.login_item()
-                && ui.checkbox(&mut on, tl!("Start ArtCraft Launcher when I log in")).changed()
+                && ui.checkbox(&mut on, tl!("Start Kojalytics Launcher when I log in")).changed()
                 && let Err(e) = host.set_login_item(on)
             {
                 let ctx = ui.ctx().clone();
@@ -454,14 +454,11 @@ impl LauncherUi {
         }
 
         section(ui, tl!("Community"));
-        ui.label(RichText::new(tl!("Questions, ideas and news from the ArtCraft team")).color(t.muted));
+        ui.label(RichText::new(tl!("Questions, ideas and news from the Kojalytics team")).color(t.muted));
         ui.add_space(6.0);
         ui.horizontal_wrapped(|ui| {
-            use artcraft_launcher_core::catalog::{DISCORD_URL, GITHUB_URL, WEBSITE_URL};
-            if widgets::button(ui, tl!("Join the Discord"), Kind::Primary, 0.0).on_hover_text(DISCORD_URL).clicked() {
-                ui.ctx().open_url(egui::OpenUrl::new_tab(DISCORD_URL));
-            }
-            if widgets::button(ui, tl!("Website"), Kind::Secondary, 0.0).on_hover_text(WEBSITE_URL).clicked() {
+            use artcraft_launcher_core::catalog::{GITHUB_URL, WEBSITE_URL};
+            if widgets::button(ui, tl!("Website"), Kind::Primary, 0.0).on_hover_text(WEBSITE_URL).clicked() {
                 ui.ctx().open_url(egui::OpenUrl::new_tab(WEBSITE_URL));
             }
             if widgets::button(ui, tl!("GitHub"), Kind::Secondary, 0.0).on_hover_text(GITHUB_URL).clicked() {
