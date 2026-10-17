@@ -17,7 +17,7 @@ pub const PUBLIC_KEY: [u8; 32] = [
 ];
 
 /// Where keys are activated.
-pub const ACTIVATE_URL: &str = "https://kojalytics.com/api/license/activate";
+pub const ACTIVATE_URL: &str = "https://www.kojalytics.com/api/license/activate";
 
 /// Crockford base32: no I, L, O or U.
 const ALPHABET: &str = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
