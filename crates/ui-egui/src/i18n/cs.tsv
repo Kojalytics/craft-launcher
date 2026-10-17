@@ -330,3 +330,11 @@ filter	Installed	Nainstalováno
 	Replace what's there?	Nahradit, co tam je?
 	{path} already exists. Installing {name} will overwrite it.	{path} už existuje. Instalace aplikace {name} ho přepíše.
 	Replace	Nahradit
+	License	Licence
+	Enter the license key from your purchase at kojalytics.com.	Zadejte licenční klíč z nákupu na kojalytics.com.
+	Activate	Aktivovat
+	Activating…	Aktivace…
+	Activated on this computer (key …{hint}).	Aktivováno na tomto počítači (klíč …{hint}).
+	Remove license from this computer	Odebrat licenci z tohoto počítače
+	License activated. Thank you!	Licence aktivována. Děkujeme!
+	Enter your license key to install apps.	Pro instalaci aplikací zadejte licenční klíč.

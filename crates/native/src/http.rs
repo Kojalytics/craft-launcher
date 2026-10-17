@@ -150,6 +150,19 @@ impl Http {
         }
     }
 
+    /// POST a JSON body; returns the status and the (small) answer, whatever the status.
+    pub fn post_json(&self, url: &str, json: &str) -> Result<(u16, String), String> {
+        let mut resp = self
+            .small
+            .post(url)
+            .header("Content-Type", "application/json")
+            .send(json)
+            .map_err(|e| format!("Couldn't reach {} ({e}). Check your internet connection.", host(url)))?;
+        let status = resp.status().as_u16();
+        let text = resp.body_mut().with_config().limit(MAX_SMALL).read_to_string().unwrap_or_default();
+        Ok((status, text))
+    }
+
     /// GET a small text file (following redirects).
     pub fn get_text(&self, url: &str) -> Result<Option<String>, String> {
         let mut resp = self.small.get(url).call().map_err(|e| format!("couldn't reach {} ({e})", host(url)))?;

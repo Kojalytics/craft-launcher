@@ -13,6 +13,7 @@ pub mod detect;
 pub mod feed_throttle;
 pub mod http;
 pub mod install;
+pub mod license;
 pub mod login;
 pub mod manifest;
 pub mod packages;

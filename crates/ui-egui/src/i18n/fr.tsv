@@ -360,3 +360,11 @@ filter	Installed	Installées
 	Replace what's there?	Remplacer l’existant ?
 	{path} already exists. Installing {name} will overwrite it.	{path} existe déjà. L’installation de {name} l’écrasera.
 	Replace	Remplacer
+	License	Licence
+	Enter the license key from your purchase at kojalytics.com.	Saisissez la clé de licence de votre achat sur kojalytics.com.
+	Activate	Activer
+	Activating…	Activation…
+	Activated on this computer (key …{hint}).	Activée sur cet ordinateur (clé …{hint}).
+	Remove license from this computer	Retirer la licence de cet ordinateur
+	License activated. Thank you!	Licence activée. Merci !
+	Enter your license key to install apps.	Saisissez votre clé de licence pour installer des apps.

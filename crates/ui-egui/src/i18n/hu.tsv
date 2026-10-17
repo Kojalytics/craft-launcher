@@ -363,3 +363,11 @@ filter	Installed	Telepítve
 	Replace what's there?	Lecseréli, ami ott van?
 	{path} already exists. Installing {name} will overwrite it.	{path} már létezik. A(z) {name} telepítése felülírja.
 	Replace	Csere
+	License	Licenc
+	Enter the license key from your purchase at kojalytics.com.	Add meg a kojalytics.com-on vásárolt licenckulcsot.
+	Activate	Aktiválás
+	Activating…	Aktiválás…
+	Activated on this computer (key …{hint}).	Ezen a számítógépen aktiválva (kulcs: …{hint}).
+	Remove license from this computer	Licenc eltávolítása erről a számítógépről
+	License activated. Thank you!	Licenc aktiválva. Köszönjük!
+	Enter your license key to install apps.	Add meg a licenckulcsot az alkalmazások telepítéséhez.

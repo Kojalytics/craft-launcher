@@ -3,7 +3,8 @@
 use std::time::Duration;
 
 use artcraft_launcher_core::protocol::{
-    Backend, BackendOptions, CANCELLED, Capabilities, Command, Event, INSTALL_CANCELLED, JobPhase, LatestRelease, PAUSED, Source,
+    Backend, BackendOptions, CANCELLED, Capabilities, Command, Event, INSTALL_CANCELLED, JobPhase, LICENSE_REQUIRED, LatestRelease, LicenseStatus, PAUSED,
+    Source,
 };
 use artcraft_launcher_core::release::Release;
 use artcraft_launcher_core::status::AppStatus;
@@ -110,6 +111,10 @@ pub struct LauncherUi {
     pub(crate) launcher_job: Option<artcraft_launcher_core::protocol::JobPhase>,
     /// The new launcher is in place: quit so it can start.
     restart_requested: bool,
+    /// This machine's license, once the backend has said (never on the web).
+    pub(crate) license: Option<LicenseStatus>,
+    /// The key typed into Settings › License.
+    pub(crate) license_key: String,
     /// News from Kojalytics's release feed, shown inline until dismissed.
     pub(crate) announcements: Vec<artcraft_launcher_core::feed::Notice>,
     /// Alerts from the feed, shown as popups until acknowledged.
@@ -185,6 +190,8 @@ impl LauncherUi {
             launcher_update: None,
             launcher_job: None,
             restart_requested: false,
+            license: None,
+            license_key: String::new(),
             announcements: Vec::new(),
             alerts: Vec::new(),
             search: String::new(),
@@ -383,6 +390,14 @@ impl LauncherUi {
                 self.restart_requested = true;
                 false
             }
+            Event::License(status) => {
+                if matches!(self.license, Some(LicenseStatus::Activating)) && matches!(status, LicenseStatus::Licensed { .. }) {
+                    self.license_key.clear();
+                    self.toast(ctx, tl!("License activated. Thank you!"), false);
+                }
+                self.license = Some(status);
+                false
+            }
             Event::Notices { announcements, alerts } => {
                 self.announcements = announcements;
                 self.alerts = alerts;
@@ -427,6 +442,10 @@ impl LauncherUi {
                         self.toast(ctx, tl!("Install cancelled. The download is kept for the next try."), false);
                     }
                     Err(e) if e == INSTALL_CANCELLED => self.toast(ctx, tl!("Install cancelled"), false),
+                    Err(e) if e == LICENSE_REQUIRED => {
+                        self.dialog = Some(Dialog::Settings);
+                        self.toast(ctx, tl!("Enter your license key to install apps."), true);
+                    }
                     // The Replace dialog says it all.
                     Err(_) if matches!(&self.dialog, Some(Dialog::Replace { app: a, .. }) if *a == app) => {}
                     Err(e) => self.toast(ctx, e, true),

@@ -9,8 +9,8 @@ use artcraft_launcher_core::catalog::{LAUNCHER, LAUNCHER_ID};
 use artcraft_launcher_core::feed::{Feed, FeedAnswer};
 use artcraft_launcher_core::platform::{Arch, Os, Platform, pick_asset};
 use artcraft_launcher_core::protocol::{
-    Backend, BackendOptions, CANCELLED, Capabilities, Command, Event, INSTALL_CANCELLED, JobPhase, LatestRelease, Origin, PAUSED, PausedDownload,
-    Source,
+    Backend, BackendOptions, CANCELLED, Capabilities, Command, Event, INSTALL_CANCELLED, JobPhase, LICENSE_REQUIRED, LatestRelease, LicenseStatus,
+    Origin, PAUSED, PausedDownload, Source,
 };
 use artcraft_launcher_core::release::{Asset, Release};
 use artcraft_launcher_core::{CraftApp, Installed, PackageKind, SUITE, version};
@@ -58,6 +58,8 @@ struct Shared {
     jobs: Mutex<HashMap<String, Arc<Stop>>>,
     /// The launcher is replacing itself and will restart: no new job starts.
     restarting: AtomicBool,
+    /// The active license's key hint; installs and updates need one.
+    license: Mutex<Option<String>>,
     manifest: Mutex<Manifest>,
     options: Mutex<BackendOptions>,
     checking: AtomicBool,
@@ -97,6 +99,8 @@ pub struct NativeBackend {
     platform: Option<Platform>,
     /// How this launcher is installed, when it can replace itself.
     self_install: Option<crate::self_update::Install>,
+    /// This machine's license device hash.
+    device: Option<String>,
 }
 
 impl NativeBackend {
@@ -123,6 +127,7 @@ impl NativeBackend {
             installed: Mutex::new(HashMap::new()),
             jobs: Mutex::new(HashMap::new()),
             restarting: AtomicBool::new(false),
+            license: Mutex::new(None),
             manifest: Mutex::new(Manifest::load(&paths.manifest())),
             options: Mutex::new(BackendOptions::default()),
             checking: AtomicBool::new(false),
@@ -137,7 +142,9 @@ impl NativeBackend {
             pictures_busy: Mutex::new(std::collections::HashSet::new()),
             last_check: Mutex::new(None),
         });
-        let backend = Self { shared, paths, http, source, platform: native_platform(), self_install: crate::self_update::current() };
+        let device = crate::license::device_hash();
+        let backend = Self { shared, paths, http, source, platform: native_platform(), self_install: crate::self_update::current(), device };
+        backend.load_license();
         backend.replay_cache();
         backend.detect_all();
         backend
@@ -169,6 +176,40 @@ impl NativeBackend {
 
     fn options(&self) -> BackendOptions {
         self.shared.options.lock().unwrap_or_else(PoisonError::into_inner).clone()
+    }
+
+    /// Reads the saved license and tells the UI.
+    fn load_license(&self) {
+        let hint = self.device.as_deref().and_then(|d| crate::license::load(&self.paths, d)).map(|l| l.hint);
+        *self.shared.license.lock().unwrap_or_else(PoisonError::into_inner) = hint.clone();
+        self.shared.emit(Event::License(match hint {
+            Some(hint) => LicenseStatus::Licensed { hint },
+            None => LicenseStatus::Unlicensed,
+        }));
+    }
+
+    fn activate(&self, key: String) {
+        let (Some(http), Some(device)) = (self.http.clone(), self.device.clone()) else {
+            let why = if self.device.is_none() { "This computer has no readable machine id." } else { "HTTPS isn't available." };
+            self.shared.emit(Event::License(LicenseStatus::Failed(why.into())));
+            return;
+        };
+        self.shared.emit(Event::License(LicenseStatus::Activating));
+        let (shared, paths) = (self.shared.clone(), self.paths.clone());
+        std::thread::spawn(move || {
+            let status = match crate::license::activate(&http, &paths, &key, &device) {
+                Ok(l) => {
+                    log::info!("license …{} activated", l.hint);
+                    *shared.license.lock().unwrap_or_else(PoisonError::into_inner) = Some(l.hint.clone());
+                    LicenseStatus::Licensed { hint: l.hint }
+                }
+                Err(e) => {
+                    log::warn!("license activation failed: {e}");
+                    LicenseStatus::Failed(e)
+                }
+            };
+            shared.emit(Event::License(status));
+        });
     }
 
     fn detect_all(&self) {
@@ -314,6 +355,10 @@ impl NativeBackend {
     fn start_job(&self, app_id: &str, work: Work) {
         let uninstall = work == Work::Uninstall;
         let Some(app) = CraftApp::by_id(app_id) else { return };
+        if !uninstall && self.shared.license.lock().unwrap_or_else(PoisonError::into_inner).is_none() {
+            self.shared.emit(Event::JobFinished { app: app.id.to_string(), result: Err(LICENSE_REQUIRED.into()) });
+            return;
+        }
         log::info!("{}: starting {} job", app.name, if uninstall { "uninstall" } else { "install/update" });
         let stop = Arc::new(Stop::default());
         let restarting = {
@@ -994,6 +1039,11 @@ impl Backend for NativeBackend {
             }
             Command::UpdateLauncher => self.update_launcher(),
             Command::FetchScreenshots { app } => self.fetch_screenshots(&app),
+            Command::Activate { key } => self.activate(key),
+            Command::Deactivate => {
+                crate::license::remove(&self.paths);
+                self.load_license();
+            }
             Command::Configure(options) => {
                 let changed_pre = {
                     let mut o = self.shared.options.lock().unwrap_or_else(PoisonError::into_inner);
@@ -1073,6 +1123,7 @@ mod tests {
             installed: Mutex::new(HashMap::new()),
             jobs: Mutex::new(HashMap::new()),
             restarting: AtomicBool::new(false),
+            license: Mutex::new(Some("TEST1".into())),
             manifest: Mutex::new(Manifest::default()),
             options: Mutex::new(BackendOptions::default()),
             checking: AtomicBool::new(false),
@@ -1336,7 +1387,7 @@ mod tests {
         let shared = shared();
         shared.latest.lock().unwrap().insert(APP.to_string(), release("0.5.0"));
         let shared = Arc::new(shared);
-        NativeBackend { shared, paths: Paths::under(root), http: None, source, platform: Some(platform), self_install: None }
+        NativeBackend { shared, paths: Paths::under(root), http: None, source, platform: Some(platform), self_install: None, device: None }
     }
 
     /// Reports again, and returns what the UI was last told about a kept download.

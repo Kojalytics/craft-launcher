@@ -358,3 +358,11 @@ filter	Installed	Установлены
 	Replace what's there?	Заменить существующее?
 	{path} already exists. Installing {name} will overwrite it.	{path} уже существует. Установка {name} перезапишет его.
 	Replace	Заменить
+	License	Лицензия
+	Enter the license key from your purchase at kojalytics.com.	Введите лицензионный ключ из покупки на kojalytics.com.
+	Activate	Активировать
+	Activating…	Активация…
+	Activated on this computer (key …{hint}).	Активирована на этом компьютере (ключ …{hint}).
+	Remove license from this computer	Удалить лицензию с этого компьютера
+	License activated. Thank you!	Лицензия активирована. Спасибо!
+	Enter your license key to install apps.	Введите лицензионный ключ, чтобы устанавливать приложения.

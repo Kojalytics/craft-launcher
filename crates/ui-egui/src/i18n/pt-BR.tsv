@@ -350,3 +350,11 @@ filter	Installed	Instalados
 	Replace what's there?	Substituir o que já existe?
 	{path} already exists. Installing {name} will overwrite it.	{path} já existe. Instalar o {name} vai substituí-lo.
 	Replace	Substituir
+	License	Licença
+	Enter the license key from your purchase at kojalytics.com.	Digite a chave de licença da sua compra em kojalytics.com.
+	Activate	Ativar
+	Activating…	Ativando…
+	Activated on this computer (key …{hint}).	Ativada neste computador (chave …{hint}).
+	Remove license from this computer	Remover a licença deste computador
+	License activated. Thank you!	Licença ativada. Obrigado!
+	Enter your license key to install apps.	Digite sua chave de licença para instalar apps.

@@ -546,7 +546,7 @@ mod tests {
     }
 
     #[test]
-    fn a_rename_out_of_Kojalytics_is_dropped() {
+    fn a_rename_out_of_kojalytics_is_dropped() {
         // Even a feed that vouches for the new repository, with matching links and checksums,
         // can't send an app's downloads to another account (#90).
         let moved = sample()

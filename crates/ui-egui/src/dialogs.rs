@@ -1,7 +1,7 @@
 //! Modal dialogs: release notes, uninstall confirmation, settings.
 
 use crate::i18n::fmt;
-use artcraft_launcher_core::protocol::Command;
+use artcraft_launcher_core::protocol::{Command, LicenseStatus};
 use artcraft_launcher_core::{Os, PackageKind};
 use egui::{RichText, vec2};
 
@@ -301,6 +301,40 @@ impl LauncherUi {
         close
     }
 
+    fn license_section(&mut self, ui: &mut egui::Ui) {
+        let t = Tokens::get(ui.ctx());
+        match self.license.clone() {
+            Some(LicenseStatus::Licensed { hint }) => {
+                ui.label(fmt(tl!("Activated on this computer (key …{hint})."), &[("hint", &hint)]));
+                ui.add_space(4.0);
+                if widgets::button(ui, tl!("Remove license from this computer"), Kind::Secondary, 0.0).clicked() {
+                    self.send(Command::Deactivate);
+                }
+            }
+            status => {
+                ui.label(RichText::new(tl!("Enter the license key from your purchase at kojalytics.com.")).color(t.muted));
+                ui.add_space(4.0);
+                let busy = status == Some(LicenseStatus::Activating);
+                ui.horizontal(|ui| {
+                    ui.add_enabled(
+                        !busy,
+                        egui::TextEdit::singleline(&mut self.license_key)
+                            .id_salt("license_key")
+                            .hint_text("KOJA-XXXXX-XXXXX-XXXXX-XXXXX")
+                            .desired_width(300.0),
+                    );
+                    let label = if busy { tl!("Activating…") } else { tl!("Activate") };
+                    if widgets::button(ui, label, Kind::Primary, 0.0).clicked() && !busy && !self.license_key.trim().is_empty() {
+                        self.send(Command::Activate { key: self.license_key.trim().to_string() });
+                    }
+                });
+                if let Some(LicenseStatus::Failed(e)) = status {
+                    ui.label(RichText::new(e).color(t.bad));
+                }
+            }
+        }
+    }
+
     fn settings_contents(&mut self, ui: &mut egui::Ui, host: &mut dyn Host) {
         let t = Tokens::get(ui.ctx());
         let section = |ui: &mut egui::Ui, s: &str| {
@@ -321,6 +355,11 @@ impl LauncherUi {
                 });
             }
         };
+
+        if self.caps.manage_apps {
+            section(ui, tl!("License"));
+            self.license_section(ui);
+        }
 
         let mut lang_code = self.settings.language.clone();
         let installed = self.cjk_font;

@@ -365,3 +365,11 @@ filter	Installed	インストール済み
 	Replace what's there?	既存の項目を置き換えますか？
 	{path} already exists. Installing {name} will overwrite it.	{path} は既に存在します。{name} をインストールすると上書きされます。
 	Replace	置き換える
+	License	ライセンス
+	Enter the license key from your purchase at kojalytics.com.	kojalytics.com で購入したライセンスキーを入力してください。
+	Activate	有効化
+	Activating…	有効化しています…
+	Activated on this computer (key …{hint}).	このコンピュータで有効化済み（キー …{hint}）。
+	Remove license from this computer	このコンピュータからライセンスを削除
+	License activated. Thank you!	ライセンスが有効になりました。ありがとうございます！
+	Enter your license key to install apps.	アプリをインストールするにはライセンスキーを入力してください。

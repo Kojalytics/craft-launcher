@@ -57,7 +57,29 @@ pub enum Command {
     },
     /// Change how the backend behaves.
     Configure(BackendOptions),
+    /// Activate a Kojalytics license key on this machine.
+    Activate {
+        key: String,
+    },
+    /// Forget this machine's license.
+    Deactivate,
 }
+
+/// Whether this machine may install apps.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum LicenseStatus {
+    Unlicensed,
+    Activating,
+    /// `hint` is the key's last five characters.
+    Licensed {
+        hint: String,
+    },
+    /// Activation failed: a sentence for the user.
+    Failed(String),
+}
+
+/// The `JobFinished` error of an install refused for want of a license.
+pub const LICENSE_REQUIRED: &str = "A Kojalytics license key is needed to install apps.";
 
 /// Parent folders for new installs. Existing installations keep their recorded location.
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
@@ -228,6 +250,8 @@ pub enum Event {
         key: String,
         result: Result<Vec<u8>, String>,
     },
+    /// This machine's license, at start and after every change.
+    License(LicenseStatus),
     CheckStarted,
     CheckFinished {
         /// Unix seconds.

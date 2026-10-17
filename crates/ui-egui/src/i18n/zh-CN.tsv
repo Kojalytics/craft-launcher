@@ -330,3 +330,11 @@ figcraft	Interface design and prototyping	界面设计与原型制作
 	Replace what's there?	替换现有内容？
 	{path} already exists. Installing {name} will overwrite it.	{path} 已存在。安装 {name} 将覆盖它。
 	Replace	替换
+	License	许可证
+	Enter the license key from your purchase at kojalytics.com.	请输入您在 kojalytics.com 购买获得的许可证密钥。
+	Activate	激活
+	Activating…	正在激活…
+	Activated on this computer (key …{hint}).	已在此电脑上激活（密钥 …{hint}）。
+	Remove license from this computer	从此电脑移除许可证
+	License activated. Thank you!	许可证已激活。谢谢！
+	Enter your license key to install apps.	请输入许可证密钥以安装应用。
