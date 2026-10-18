@@ -811,26 +811,20 @@ fn the_uninstall_prompt_keeps_its_own_size_after_a_taller_dialog() {
 }
 
 #[test]
-fn links_to_the_website_github_and_each_apps_pages() {
+fn links_to_the_website_and_no_github() {
     let (mut h, _) = harness(ViewMode::Grid, egui::Theme::Dark, true);
     h.run_steps(6);
-    // Footer: website and GitHub.
-    for label in ["Website", "GitHub"] {
-        assert!(h.query_all_by_label(label).count() >= 1, "{label}");
-    }
-    // Cards: every app links to its repo and to its own page on kojalytics.com (plus the footer's).
-    let shown_cards = h.query_all_by_label("GitHub").count() - 1;
+    // The footer and every card link to the Kojalytics website; nothing links to GitHub.
     let shown_sites = h.query_all_by_label("Website").count() - 1;
-    assert!(shown_cards >= 13, "{shown_cards}");
-    assert_eq!(shown_sites, 13, "every app has a website page");
-    // The table's … menu has the app's website and GitHub repo.
+    assert_eq!(shown_sites, 13, "every app links to the website");
+    assert_eq!(h.query_all_by_label_contains("GitHub").count(), 0);
+    // The table's … menu has the app's website, and no GitHub repo or releases.
     let (mut h, _) = harness(ViewMode::Table, egui::Theme::Dark, true);
     h.run_steps(6);
     h.get_all_by_label("…").nth(7).unwrap().click(); // WordKoja
     h.run_steps(3);
-    h.get_by_label("GitHub repository");
-    // The footer's Website link and WordKoja's now-live one in the menu.
     assert!(h.query_all_by_label_contains("Website").count() >= 2);
+    assert!(h.query_by_label("GitHub repository").is_none() && h.query_by_label("All releases").is_none());
 }
 
 /// Clicks the `n`th widget labelled `label` and returns the URL the app asked to open.
@@ -863,17 +857,15 @@ fn all_opened(h: &mut Harness<'_, Option<LauncherUi>>, label: &str) -> Vec<Strin
 fn links_open_the_right_pages() {
     let (mut h, _) = harness(ViewMode::Grid, egui::Theme::Dark, true);
     h.run_steps(6);
-    // The footer's Kojalytics links and each card's own pages.
-    let github = all_opened(&mut h, "GitHub");
-    assert!(github.contains(&"https://github.com/Kojalytics".to_string()), "{github:?}");
-    assert!(github.contains(&"https://github.com/Kojalytics/photocraft".to_string()), "{github:?}");
+    // The footer's link opens kojalytics.com; each card's opens the Koja apps page.
     let sites = all_opened(&mut h, "Website");
     assert!(sites.contains(&"https://kojalytics.com".to_string()), "{sites:?}");
-    assert!(sites.contains(&"https://kojalytics.com/apps/photocraft".to_string()), "{sites:?}");
-    // The … menu.
+    assert!(sites.contains(&"https://www.kojalytics.com/koja-apps".to_string()), "{sites:?}");
+    // The … menu's link (the last "Website" once the menu is open) opens the same page.
     h.get_all_by_label("…").next().unwrap().click();
     h.run_steps(3);
-    assert_eq!(click_opens(&mut h, "All releases").as_deref(), Some("https://github.com/Kojalytics/photocraft/releases"));
+    let last = h.query_all_by_label("Website").count() - 1;
+    assert_eq!(click_nth_opens(&mut h, "Website", last).as_deref(), Some("https://www.kojalytics.com/koja-apps"));
 }
 
 #[test]
@@ -1217,10 +1209,9 @@ fn clicking_a_card_opens_its_details_drawer() {
     snapshot(&mut h, "details-dark");
     h.get_by_label_contains("The image editor you already know how to use");
     h.get_by_label_contains("Curves and type layers · 1/4");
-    // The links the page offers as buttons of their own.
+    // The page links to the Kojalytics website, and to no GitHub page.
     h.get_by_label("Website ↗");
-    h.get_by_label("GitHub ↗");
-    h.get_by_label("Releases ↗");
+    assert!(h.query_by_label("GitHub ↗").is_none() && h.query_by_label("Releases ↗").is_none());
     // The picture arrows wrap around, and the thumbnails jump.
     h.get_by_label("Previous picture (←)").click();
     h.run_steps(3);
@@ -1460,6 +1451,8 @@ fn the_drawer_and_the_enlarged_picture_survive_any_window_size() {
 
 #[test]
 fn the_rate_limit_notice_never_runs_under_the_footer_links() {
+    // The labels below are English: don't depend on the machine's language.
+    artcraft_launcher_ui_egui::i18n::set_test_lang(artcraft_launcher_ui_egui::i18n::Lang::EN);
     for width in [720.0, 960.0, 1180.0] {
         let mut evs = events();
         evs.push(Event::CheckFinished { at: NOW - 180, source: Source::GitHubApi, rate_limited_until: Some(NOW + 1800) });
@@ -1492,14 +1485,15 @@ fn the_rate_limit_notice_never_runs_under_the_footer_links() {
         let checked = h.get_by_label_contains("Checked ").rect();
         // Cut short in a narrow window, but enough of it left to read.
         assert!(notice.width() >= 120.0 && notice.right() <= width, "{width}: notice {notice:?}");
-        // Everything on the footer's right: the two links and (when there's room) the platform.
+        // Everything on the footer's right: the Website link and (when there's room) the platform.
         let mut right = Vec::new();
-        for label in ["Website", "GitHub"] {
+        for label in ["Website"] {
             right.extend(h.query_all_by_label(label).map(|n| n.rect()).filter(|r| (r.center().y - notice.center().y).abs() < 12.0));
         }
-        assert_eq!(right.len(), 2, "{width}: {right:?}");
+        assert_eq!(right.len(), 1, "{width}: {right:?}");
         let platform = h.query_by_label_contains("Installing for").map(|n| n.rect());
-        assert_eq!(platform.is_some(), width > 720.0, "{width}: the platform label shows unless the window is narrow");
+        // With only the Website link on the right, the platform label has room from 720 pt up.
+        assert!(platform.is_some(), "{width}: the platform label shows");
         right.extend(platform);
         for r in right {
             assert!(!r.intersects(notice), "{width}: notice {notice:?} overlaps {r:?}");

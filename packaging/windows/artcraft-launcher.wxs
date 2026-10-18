@@ -10,7 +10,7 @@
 
   Per-user install (no UAC prompt), by default into %LOCALAPPDATA%\Programs\ArtCraft Launcher, so
   the launcher can update itself without elevation, plus a Start Menu shortcut. The shortcut
-  carries the AppUserModelID ai.storyteller.artcraft-launcher, which Windows needs to show toast
+  carries the AppUserModelID com.kojalytics.artcraft-launcher, which Windows needs to show toast
   notifications from an unpackaged app and to group the taskbar button. No file associations.
 
   Double-clicked, it opens a setup wizard that names the version: Welcome; a folder page to pick
@@ -46,7 +46,7 @@
     <Property Id="ARPPRODUCTICON" Value="ArtCraftLauncherIcon.exe" />
     <Property Id="ARPURLINFOABOUT" Value="https://getartcraft.com/apps" />
     <Property Id="ARPURLUPDATEINFO" Value="https://github.com/storytold/craft-launcher/releases" />
-    <Property Id="ARPHELPLINK" Value="https://discord.gg/artcraft" />
+    <Property Id="ARPHELPLINK" Value="https://www.kojalytics.com/contact" />
 
     <StandardDirectory Id="LocalAppDataFolder">
       <Directory Id="LocalProgramsFolder" Name="Programs">
@@ -158,7 +158,7 @@
             Description="Install and update the Craft App Suite"
             Target="[#ArtCraftLauncherExe]" WorkingDirectory="INSTALLFOLDER"
             Icon="ArtCraftLauncherIcon.exe" IconIndex="0">
-          <ShortcutProperty Key="System.AppUserModel.ID" Value="ai.storyteller.artcraft-launcher" />
+          <ShortcutProperty Key="System.AppUserModel.ID" Value="com.kojalytics.artcraft-launcher" />
         </Shortcut>
         <RegistryValue Root="HKCU" Key="Software\Learning Machines LLC\ArtCraft Launcher" Name="StartMenuShortcut" Value="1" Type="integer" KeyPath="yes" />
       </Component>
@@ -170,7 +170,7 @@
             Description="Install and update the Craft App Suite"
             Target="[#ArtCraftLauncherExe]" WorkingDirectory="INSTALLFOLDER"
             Icon="ArtCraftLauncherIcon.exe" IconIndex="0">
-          <ShortcutProperty Key="System.AppUserModel.ID" Value="ai.storyteller.artcraft-launcher" />
+          <ShortcutProperty Key="System.AppUserModel.ID" Value="com.kojalytics.artcraft-launcher" />
         </Shortcut>
         <RegistryValue Root="HKCU" Key="Software\Learning Machines LLC\ArtCraft Launcher" Name="DesktopShortcut" Value="1" Type="integer" KeyPath="yes" />
       </Component>

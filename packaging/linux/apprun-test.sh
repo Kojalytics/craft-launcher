@@ -8,7 +8,7 @@ set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(cd "$HERE/../.." && pwd)"
-APP_ID=ai.storyteller.artcraft-launcher
+APP_ID=com.kojalytics.artcraft-launcher
 
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT

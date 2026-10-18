@@ -41,7 +41,6 @@
 	Latest version	Legújabb verzió
 	Newest release	Legújabb kiadás
 	Discord	Discord
-	GitHub	GitHub
 	Website	Webhely
 	Classic apps	Eredeti alkalmazások
 	New apps	Új alkalmazások
@@ -72,7 +71,6 @@
 	Show in Files	Megjelenítés a fájlkezelőben
 	Reinstall	Újratelepítés
 	Uninstall…	Eltávolítás…
-	All releases	Minden kiadás
 	Kojalytics Launcher {version} is available.	Elérhető az Kojalytics Launcher új verziója: {version}.
 	Dismiss	Elrejtés
 	Update and restart	Frissítés és újraindítás
@@ -81,7 +79,6 @@
 	What's new	Újdonságok
 	No notes were published with this release.	Ehhez a kiadáshoz nem tettek közzé kiadási információkat.
 	Released {date}	Megjelent: {date}
-	Open on GitHub	Megnyitás a GitHubon
 	Close	Bezárás
 	Kojalytics Launcher {version}	Kojalytics Launcher {version}
 	Only when I ask	Csak kézi kereséskor
@@ -234,7 +231,6 @@ month	Dec	dec.
 	Downloads the new version, replaces this one and opens it again	Letölti és telepíti az új verziót, majd újraindítja az alkalmazást
 	Couldn't check for updates: {f}	Nem sikerült frissítéseket keresni: {f}
 	Website (coming soon)	Webhely (hamarosan)
-	GitHub repository	GitHub-tároló
 	Kojalytics	Kojalytics
 	Update 1 app	1 alkalmazás frissítése
 	Update all ({count})	Összes frissítése ({count})
@@ -269,7 +265,6 @@ filter	Installed	Telepítve
 	Latest release	Legújabb kiadás
 	Version	Verzió
 	Platforms	Platformok
-	Releases	Kiadások
 	Enlarge picture	Kép nagyítása
 	Click to enlarge	Kattints a nagyításhoz
 	Previous picture (←)	Előző kép (←)
@@ -343,7 +338,6 @@ filter	Installed	Telepítve
 	Show Kojalytics Launcher	Kojalytics Launcher megjelenítése
 	Check for Updates	Frissítések keresése
 	Visit kojalytics.com	kojalytics.com megnyitása
-	Kojalytics on GitHub	Kojalytics a GitHubon
 	Join the Kojalytics Discord	Csatlakozás az Kojalytics Discord-közösségéhez
 @plural	Kojalytics Launcher · {n} update available|Kojalytics Launcher · {n} updates available	Kojalytics Launcher · {n} frissítés elérhető|Kojalytics Launcher · {n} frissítés elérhető
 	Install folder	Telepítési mappa

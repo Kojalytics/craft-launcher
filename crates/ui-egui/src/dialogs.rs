@@ -104,7 +104,6 @@ impl LauncherUi {
         ui.add_space(12.0);
         let mut close = false;
         ui.horizontal(|ui| {
-            widgets::hud_link(ui, tl!("Open on GitHub"), &release.html_url);
             ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                 close = widgets::button(ui, tl!("Close"), Kind::Secondary, 90.0).clicked();
             });
@@ -496,12 +495,9 @@ impl LauncherUi {
         ui.label(RichText::new(tl!("Questions, ideas and news from the Kojalytics team")).color(t.muted));
         ui.add_space(6.0);
         ui.horizontal_wrapped(|ui| {
-            use artcraft_launcher_core::catalog::{GITHUB_URL, WEBSITE_URL};
+            use artcraft_launcher_core::catalog::WEBSITE_URL;
             if widgets::button(ui, tl!("Website"), Kind::Primary, 0.0).on_hover_text(WEBSITE_URL).clicked() {
                 ui.ctx().open_url(egui::OpenUrl::new_tab(WEBSITE_URL));
-            }
-            if widgets::button(ui, tl!("GitHub"), Kind::Secondary, 0.0).on_hover_text(GITHUB_URL).clicked() {
-                ui.ctx().open_url(egui::OpenUrl::new_tab(GITHUB_URL));
             }
             // Wrap the social links as a group so their icons stay together.
             let count = artcraft_launcher_core::catalog::SOCIAL.len() as f32;

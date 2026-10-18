@@ -55,14 +55,13 @@ impl Tray {
     pub fn new(wake: impl Fn() + Send + Sync + Clone + 'static, on_quit: impl Fn() + Send + Sync + 'static) -> Result<Self, String> {
         let show = MenuItem::new(i18n::t("Show Kojalytics Launcher"), true, None);
         let check = MenuItem::new(i18n::t("Check for Updates"), true, None);
-        use artcraft_launcher_core::catalog::{GITHUB_URL, WEBSITE_URL};
+        use artcraft_launcher_core::catalog::WEBSITE_URL;
         let website = MenuItem::new(i18n::t("Visit kojalytics.com"), true, None);
-        let github = MenuItem::new(i18n::t("Kojalytics on GitHub"), true, None);
         let quit = MenuItem::new(i18n::t("Quit Kojalytics Launcher"), true, None);
         let menu = Menu::new();
-        menu.append_items(&[&show, &check, &PredefinedMenuItem::separator(), &website, &github, &PredefinedMenuItem::separator(), &quit])
+        menu.append_items(&[&show, &check, &PredefinedMenuItem::separator(), &website, &PredefinedMenuItem::separator(), &quit])
             .map_err(|e| e.to_string())?;
-        let links = [(website.id().clone(), WEBSITE_URL), (github.id().clone(), GITHUB_URL)];
+        let links = [(website.id().clone(), WEBSITE_URL)];
         let icon = identity(TrayIconBuilder::new())
             .with_menu(Box::new(menu))
             .with_icon(load_icon()?)
@@ -106,7 +105,6 @@ impl Tray {
             (show, "Show Kojalytics Launcher"),
             (check, "Check for Updates"),
             (website, "Visit kojalytics.com"),
-            (github, "Kojalytics on GitHub"),
             (quit, "Quit Kojalytics Launcher"),
         ];
         Ok(Self { icon, show: show_id, check: check_id, quit: quit_id, rx, tooltip: String::new(), language: String::new(), labels })

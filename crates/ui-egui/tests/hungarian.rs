@@ -160,7 +160,7 @@ fn check_settings_layout() {
         assert!(screen.contains_rect(title), "{width}x{height}: title is clipped: {title:?}");
         h.get_by_label("Rendszerbeállítás szerint").scroll_to_me();
         h.run_steps(8);
-        // The footer has the same services, and the cards behind the modal have Webhely and GitHub
+        // The footer has the same service, and the cards behind the modal have Webhely
         // links as one 14px line of text; keep only the settings body's buttons (34px) and icons (24px).
         let theme = h.get_by_label("Rendszerbeállítás szerint").rect();
         let website =
@@ -168,15 +168,6 @@ fn check_settings_layout() {
         assert!(screen.contains_rect(website), "community links must be reachable by scrolling");
         assert!(theme.bottom() < done.top(), "appearance controls must scroll above the fixed actions");
         let mut links = vec![website];
-        for label in ["GitHub"] {
-            let candidates: Vec<_> = h
-                .query_all_by_label(label)
-                .map(|n| n.rect())
-                .filter(|r| r.top() >= website.top() - 1.0 && r.bottom() < theme.top() && r.height() > 20.0)
-                .collect();
-            assert_eq!(candidates.len(), 1, "{width}x{height}: settings link {label}: {candidates:?}");
-            links.extend(candidates);
-        }
         for (i, r) in links.iter().enumerate() {
             assert!(screen.contains_rect(*r), "{width}x{height}: link is clipped: {r:?}");
             for other in links.iter().skip(i + 1) {

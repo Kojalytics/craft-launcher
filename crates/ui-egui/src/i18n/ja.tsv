@@ -43,7 +43,6 @@
 	Latest version	最新バージョン
 	Newest release	最新リリース
 	Discord	Discord
-	GitHub	GitHub
 	Website	ウェブサイト
 	Classic apps	クラシックアプリ
 	New apps	新着アプリ
@@ -74,7 +73,6 @@
 	Show in Files	ファイルマネージャーで表示
 	Reinstall	再インストール
 	Uninstall…	アンインストール…
-	All releases	すべてのリリース
 	Kojalytics Launcher {version} is available.	Kojalytics Launcher {version} が利用可能です。
 	Dismiss	閉じる
 	Update and restart	更新して再起動
@@ -83,7 +81,6 @@
 	What's new	新着情報
 	No notes were published with this release.	このリリースにはリリースノートが公開されていません。
 	Released {date}	{date} 公開
-	Open on GitHub	GitHub で開く
 	Close	閉じる
 	Kojalytics Launcher {version}	Kojalytics Launcher {version}
 	Only when I ask	手動で確認したときのみ
@@ -236,7 +233,6 @@ month	Dec	12月
 	Downloads the new version, replaces this one and opens it again	新しいバージョンをダウンロードし、現在のバージョンと置き換えて再び開きます
 	Couldn't check for updates: {f}	更新を確認できませんでした: {f}
 	Website (coming soon)	ウェブサイト（近日公開）
-	GitHub repository	GitHub リポジトリ
 	Kojalytics	Kojalytics
 	Update 1 app	1 個のアプリを更新
 	Update all ({count})	すべて更新（{count}）
@@ -271,7 +267,6 @@ filter	Installed	インストール済み
 	Latest release	最新リリース
 	Version	バージョン
 	Platforms	対応プラットフォーム
-	Releases	リリース
 	Enlarge picture	画像を拡大
 	Click to enlarge	クリックして拡大
 	Previous picture (←)	前の画像 (←)
@@ -345,7 +340,6 @@ filter	Installed	インストール済み
 	Show Kojalytics Launcher	Kojalytics Launcher を表示
 	Check for Updates	更新を確認
 	Visit kojalytics.com	kojalytics.com を開く
-	Kojalytics on GitHub	GitHub の Kojalytics
 	Join the Kojalytics Discord	Kojalytics Discord に参加
 @plural	Kojalytics Launcher · {n} update available|Kojalytics Launcher · {n} updates available	Kojalytics Launcher · {n} 件の更新があります
 	Install folder	インストール先フォルダー

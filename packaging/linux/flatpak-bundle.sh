@@ -11,12 +11,12 @@
 # `appstreamcli compose`; the freedesktop runtime and SDK named in the manifest are
 # installed per-user from Flathub. Unless --no-test, the bundle is then installed per-user and its
 # files are listed inside the sandbox as a smoke test (the launcher is GUI-only, so it isn't run).
-# Manifest: packaging/linux/flatpak/ai.storyteller.artcraft-launcher.bundle.yml.
+# Manifest: packaging/linux/flatpak/com.kojalytics.artcraft-launcher.bundle.yml.
 set -euo pipefail
 # shellcheck source=../env.sh
 . "$(dirname "${BASH_SOURCE[0]}")/../env.sh"
 HERE="$ROOT/packaging/linux"
-APP_ID=ai.storyteller.artcraft-launcher
+APP_ID=com.kojalytics.artcraft-launcher
 PKG=artcraft-launcher
 FLATHUB=https://dl.flathub.org/repo/flathub.flatpakrepo
 

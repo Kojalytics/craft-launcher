@@ -41,7 +41,6 @@
 	Latest version	Najnowsza wersja
 	Newest release	Najnowsze wydanie
 	Discord	Discord
-	GitHub	GitHub
 	Website	Strona
 	Classic apps	Klasyczne aplikacje
 	New apps	Nowe aplikacje
@@ -73,7 +72,6 @@
 	Show in Files	Pokaż w menedżerze plików
 	Reinstall	Przeinstaluj
 	Uninstall…	Odinstaluj…
-	All releases	Wszystkie wydania
 	Kojalytics Launcher {version} is available.	Dostępna jest nowa wersja Kojalytics Launcher ({version}).
 	Dismiss	Zamknij
 	Update and restart	Zaktualizuj i zrestartuj
@@ -82,7 +80,6 @@
 	What's new	Co nowego
 	No notes were published with this release.	Dla tego wydania nie opublikowano żadnych notatek.
 	Released {date}	Wydano {date}
-	Open on GitHub	Otwórz na GitHubie
 	Close	Zamknij
 	Kojalytics Launcher {version}	Kojalytics Launcher {version}
 	Only when I ask	Tylko kiedy zapytam
@@ -235,7 +232,6 @@ month	Dec	gru
 	Downloads the new version, replaces this one and opens it again	Pobiera nową wersję, zastępuje obecną i uruchamia ją ponownie.
 	Couldn't check for updates: {f}	Nie udało się sprawdzić aktualizacji: {f}
 	Website (coming soon)	Strona (wkrótce)
-	GitHub repository	Repozytorium na GitHubie
 	Kojalytics	Kojalytics
 	Update 1 app	Zaktualizuj 1 aplikację
 	Update all ({count})	Zaktualizuj wszystkie ({count})
@@ -270,7 +266,6 @@ filter	Installed	Zainstalowane
 	Latest release	Najnowsze wydanie
 	Version	Wersja
 	Platforms	Platformy
-	Releases	Wydania
 	Enlarge picture	Powiększ obraz
 	Click to enlarge	Kliknij, aby powiększyć
 	Previous picture (←)	Poprzedni obraz (←)
@@ -344,7 +339,6 @@ filter	Installed	Zainstalowane
 	Show Kojalytics Launcher	Pokaż Kojalytics Launcher
 	Check for Updates	Sprawdź dostępność aktualizacji
 	Visit kojalytics.com	Odwiedź kojalytics.com
-	Kojalytics on GitHub	Kojalytics na GitHubie
 	Join the Kojalytics Discord	Dołącz do Discorda Kojalytics
 @plural	Kojalytics Launcher · {n} update available|Kojalytics Launcher · {n} updates available	Kojalytics Launcher · {n} dostępna aktualizacja|Kojalytics Launcher · {n} dostępne aktualizacje|Kojalytics Launcher · {n} dostępnych aktualizacji
 	Install folder	Folder instalacji

@@ -2,12 +2,12 @@
 <!-- AppStream metadata (software centres, Flathub). Template: package.sh and the Flatpak
      manifest substitute @VERSION@ and @DATE@ from Cargo.toml and the build date. -->
 <component type="desktop-application">
-  <id>ai.storyteller.artcraft-launcher</id>
+  <id>com.kojalytics.artcraft-launcher</id>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>MIT OR Apache-2.0</project_license>
   <name>ArtCraft Launcher</name>
   <summary>Install, update and launch the Craft App Suite</summary>
-  <developer id="ai.storyteller">
+  <developer id="com.kojalytics">
     <name>Learning Machines LLC</name>
   </developer>
   <description>
@@ -22,13 +22,13 @@
       <li>Lives in the system tray and tells you when updates are ready</li>
     </ul>
   </description>
-  <launchable type="desktop-id">ai.storyteller.artcraft-launcher.desktop</launchable>
-  <icon type="stock">ai.storyteller.artcraft-launcher</icon>
+  <launchable type="desktop-id">com.kojalytics.artcraft-launcher.desktop</launchable>
+  <icon type="stock">com.kojalytics.artcraft-launcher</icon>
   <!-- Only url types known to appstream 0.15 (Ubuntu 22.04, where CI validates): no vcs-browser. -->
   <url type="homepage">https://getartcraft.com/apps</url>
   <url type="bugtracker">https://github.com/storytold/craft-launcher/issues</url>
   <url type="help">https://github.com/storytold/craft-launcher</url>
-  <url type="contact">https://discord.gg/artcraft</url>
+  <url type="contact">https://www.kojalytics.com/contact</url>
   <categories>
     <category>Utility</category>
     <category>PackageManager</category>

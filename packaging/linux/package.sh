@@ -21,7 +21,7 @@ set -euo pipefail
 # shellcheck source=../env.sh
 . "$(dirname "${BASH_SOURCE[0]}")/../env.sh"
 HERE="$ROOT/packaging/linux"
-APP_ID=ai.storyteller.artcraft-launcher
+APP_ID=com.kojalytics.artcraft-launcher
 PKG=artcraft-launcher
 
 SKIP_BUILD=0

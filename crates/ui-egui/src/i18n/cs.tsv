@@ -27,7 +27,6 @@
 	Latest version	Nejnovější verze
 	Newest release	Nejnovější vydání
 	Discord	Discord
-	GitHub	GitHub
 	Website	Web
 	Classic apps	Klasické aplikace
 	Classic	Klasické
@@ -59,7 +58,6 @@
 	Show in Files	Zobrazit v Souborech
 	Reinstall	Znovu nainstalovat
 	Uninstall…	Odinstalovat…
-	All releases	Všechna vydání
 	Kojalytics Launcher {version} is available.	Je k dispozici Kojalytics Launcher {version}.
 	Dismiss	Skrýt
 	Update and restart	Aktualizovat a restartovat
@@ -68,7 +66,6 @@
 	What's new	Co je nového
 	No notes were published with this release.	K tomuto vydání nebyly zveřejněny žádné poznámky.
 	Released {date}	Vydáno {date}
-	Open on GitHub	Otevřít na GitHubu
 	Close	Zavřít
 	Kojalytics Launcher {version}	Kojalytics Launcher {version}
 	Only when I ask	Pouze na vyžádání
@@ -214,7 +211,6 @@ month	Dec	12.
 	Downloads the new version, replaces this one and opens it again	Stáhne novou verzi, nahradí tuto verzi a znovu ji otevře
 	Couldn't check for updates: {f}	Aktualizace nelze zkontrolovat: {f}
 	Website (coming soon)	Web (již brzy)
-	GitHub repository	Repozitář na GitHubu
 	Kojalytics	Kojalytics
 	Update 1 app	Aktualizovat 1 aplikaci
 	Update all ({count})	Aktualizovat vše ({count})
@@ -245,7 +241,6 @@ filter	Installed	Nainstalováno
 	Latest release	Nejnovější verze
 	Version	Verze
 	Platforms	Platformy
-	Releases	Vydání
 	Enlarge picture	Zvětšit obrázek
 	Click to enlarge	Kliknutím zvětšíte
 	Previous picture (←)	Předchozí obrázek (←)
@@ -310,7 +305,6 @@ filter	Installed	Nainstalováno
 	Show Kojalytics Launcher	Zobrazit Kojalytics Launcher
 	Check for Updates	Zkontrolovat aktualizace
 	Visit kojalytics.com	Navštívit kojalytics.com
-	Kojalytics on GitHub	Kojalytics na GitHubu
 	Join the Kojalytics Discord	Připojit se na Kojalytics Discord
 @plural	Kojalytics Launcher · {n} update available|Kojalytics Launcher · {n} updates available	Kojalytics Launcher · {n} dostupná aktualizace|Kojalytics Launcher · {n} dostupné aktualizace|Kojalytics Launcher · {n} dostupných aktualizací
 	Install folder	Instalační složka

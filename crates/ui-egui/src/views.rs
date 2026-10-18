@@ -315,8 +315,8 @@ impl LauncherUi {
             Some(p) => fmt(tl!("Downloads for {platform}"), &[("platform", &p.label())]),
             None => tl!("No downloads for this system").into(),
         };
-        use artcraft_launcher_core::catalog::{GITHUB_URL, SOCIAL, WEBSITE_URL};
-        let links = [(tl!("GitHub"), GITHUB_URL), (tl!("Website"), WEBSITE_URL)];
+        use artcraft_launcher_core::catalog::{SOCIAL, WEBSITE_URL};
+        let links = [(tl!("Website"), WEBSITE_URL)];
         let (icon, link_gap) = (13.0, 16.0);
         // The links and icons on the right keep their size; the status on the left gets what is
         // left and is cut short with "…", never drawn under them. A narrow window drops the
@@ -428,7 +428,6 @@ impl LauncherUi {
             widgets::tag(&mut strip_ui, &number, app_color, Color32::BLACK);
             strip_ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                 ui.spacing_mut().item_spacing.x = 16.0;
-                widgets::hud_link(ui, tl!("GitHub"), &app.repo_url());
                 widgets::hud_link(ui, tl!("Website"), &app.website());
             });
         }
@@ -873,8 +872,6 @@ impl LauncherUi {
                     }
                 };
                 link(ui, tl!("Website"), entry.app.website());
-                link(ui, tl!("GitHub repository"), entry.app.repo_url());
-                link(ui, tl!("All releases"), entry.app.releases_url());
             }
             ui.separator();
             let hidden = self.settings.hidden.contains(entry.app.id);

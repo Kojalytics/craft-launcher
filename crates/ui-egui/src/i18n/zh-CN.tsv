@@ -26,7 +26,6 @@
 	Latest version	最新版本
 	Newest release	发布日期
 	Discord	Discord
-	GitHub	GitHub
 	Website	网站
 	Classic apps	经典应用
 	New apps	新应用
@@ -54,7 +53,6 @@
 	Release notes	更新说明
 	Reinstall	重新安装
 	Uninstall…	卸载…
-	All releases	所有版本
 	Kojalytics Launcher {version} is available.	Kojalytics Launcher {version} 已可更新。
 	Dismiss	忽略
 	Update and restart	更新并重启
@@ -63,7 +61,6 @@
 	What's new	更新内容
 	No notes were published with this release.	此版本未提供更新说明。
 	Released {date}	发布于 {date}
-	Open on GitHub	在 GitHub 上打开
 	Close	关闭
 	Kojalytics Launcher {version}	Kojalytics Launcher {version}
 	Only when I ask	仅手动检查
@@ -150,7 +147,6 @@ month	Dec	12月
 	Checking for updates…	正在检查更新…
 	Downloads the new version, replaces this one and opens it again	下载新版本，替换当前版本并重新打开
 	Couldn't check for updates: {f}	无法检查更新：{f}
-	GitHub repository	GitHub 仓库
 	Kojalytics	Kojalytics
 	Update 1 app	更新 1 个应用
 	Update all ({count})	全部更新（{count}）
@@ -232,7 +228,6 @@ filter	Installed	已安装
 	Show Kojalytics Launcher	显示 Kojalytics Launcher
 	Check for Updates	检查更新
 	Visit kojalytics.com	访问 kojalytics.com
-	Kojalytics on GitHub	Kojalytics 的 GitHub 主页
 	Join the Kojalytics Discord	加入 Kojalytics Discord 社区
 @plural	Kojalytics Launcher · {n} update available|Kojalytics Launcher · {n} updates available	Kojalytics Launcher · 有 {n} 个可用更新
 @plural	{n} app|{n} apps	{n} 个应用
@@ -296,7 +291,6 @@ figcraft	Interface design and prototyping	界面设计与原型制作
 	Latest release	最新发布
 	Version	版本
 	Platforms	平台
-	Releases	版本发布
 	Enlarge picture	放大图片
 	Click to enlarge	点击放大
 	Previous picture (←)	上一张（←）

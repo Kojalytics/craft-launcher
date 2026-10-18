@@ -86,10 +86,20 @@ notarize() {
   local auth=(--apple-id "${APPLE_ID:-}" --password "${APPLE_PASSWORD:-}" --team-id "${APPLE_TEAM_ID:-}")
   [ -n "${NOTARY_PROFILE:-}" ] && auth=(--keychain-profile "$NOTARY_PROFILE")
   echo "==> notarizing $(basename "$file") (this can take a few minutes)"
-  out="$(xcrun notarytool submit "$file" "${auth[@]}" --wait --timeout 1h --output-format json)" || true
+  out="$(xcrun notarytool submit "$file" "${auth[@]}" --output-format json)" || true
   echo "$out"
   id="$(printf '%s' "$out" | plutil -extract id raw -o - - 2>/dev/null || true)"
-  status="$(printf '%s' "$out" | plutil -extract status raw -o - - 2>/dev/null || true)"
+  status=""
+  # Apple can take long (a new account: an hour or more). A dropped connection only ends this
+  # wait, not the submission, so ask again.
+  for _ in 1 2 3 4 5 6; do
+    [ -n "$id" ] || break
+    out="$(xcrun notarytool wait "$id" "${auth[@]}" --timeout 1h --output-format json)" || true
+    echo "$out"
+    status="$(printf '%s' "$out" | plutil -extract status raw -o - - 2>/dev/null || true)"
+    case "$status" in Accepted | Invalid | Rejected) break ;; esac
+    sleep 30
+  done
   if [ "$status" != "Accepted" ]; then
     if [ -n "$id" ]; then
       xcrun notarytool log "$id" "${auth[@]}" || true

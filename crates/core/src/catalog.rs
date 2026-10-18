@@ -65,7 +65,7 @@ impl CraftApp {
 
     /// The app's page on kojalytics.com.
     pub fn website(&self) -> String {
-        format!("https://kojalytics.com/apps/{}", self.id)
+        "https://www.kojalytics.com/koja-apps".to_string()
     }
 
     /// Asset stems this app's releases may use, current first.
@@ -260,7 +260,7 @@ mod tests {
         let pdf = CraftApp::by_id("pdfcraft").unwrap();
         assert_eq!(pdf.stems().collect::<Vec<_>>(), ["pdfcraft", "printcraft"]);
         assert_eq!(pdf.names().collect::<Vec<_>>(), ["PdfKoja", "PrintCraft"]);
-        assert_eq!(pdf.website(), "https://kojalytics.com/apps/pdfcraft");
-        assert_eq!(CraftApp::by_id("wordcraft").unwrap().website(), "https://kojalytics.com/apps/wordcraft");
+        assert_eq!(pdf.website(), "https://www.kojalytics.com/koja-apps");
+        assert_eq!(CraftApp::by_id("wordcraft").unwrap().website(), "https://www.kojalytics.com/koja-apps");
     }
 }

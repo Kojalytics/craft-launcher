@@ -9,9 +9,9 @@
 # Wayland, xkbcommon and Vulkan at runtime; the freedesktop runtime has all of them, and the
 # GPU driver comes from its org.freedesktop.Platform.GL extension.
 #
-# ai.storyteller.artcraft-launcher.yml (same directory) is the from-source manifest for Flathub.
+# com.kojalytics.artcraft-launcher.yml (same directory) is the from-source manifest for Flathub.
 # Keep runtime-version and finish-args identical in both (packaging-lint checks this).
-id: ai.storyteller.artcraft-launcher
+id: com.kojalytics.artcraft-launcher
 runtime: org.freedesktop.Platform
 runtime-version: '26.08'
 sdk: org.freedesktop.Sdk
@@ -38,7 +38,7 @@ finish-args:
   # Apps normally install as Flatpaks and run on the host: `flatpak-spawn --host` (below) starts
   # them, and the home directory is granted so files opened by path work. When the host has no
   # usable Flatpak the launcher falls back to the release tarball, which it unpacks into its own
-  # folder (~/.var/app/ai.storyteller.artcraft-launcher/data/artcraft-launcher/apps/<app>) and
+  # folder (~/.var/app/com.kojalytics.artcraft-launcher/data/artcraft-launcher/apps/<app>) and
   # runs in the same sandbox with HOME pointed at a home/ folder beside it, so each app's
   # settings stay in the sandbox too.
   # LIMITATION: installing software on the host still needs `flatpak-spawn --host`. Distro
@@ -52,9 +52,9 @@ modules:
     buildsystem: simple
     build-commands:
       - install -Dm755 bin/artcraft-launcher /app/bin/artcraft-launcher
-      - install -Dm644 share/applications/ai.storyteller.artcraft-launcher.desktop /app/share/applications/ai.storyteller.artcraft-launcher.desktop
+      - install -Dm644 share/applications/com.kojalytics.artcraft-launcher.desktop /app/share/applications/com.kojalytics.artcraft-launcher.desktop
       # Already has the release's version and date substituted by package.sh.
-      - install -Dm644 share/metainfo/ai.storyteller.artcraft-launcher.metainfo.xml /app/share/metainfo/ai.storyteller.artcraft-launcher.metainfo.xml
+      - install -Dm644 share/metainfo/com.kojalytics.artcraft-launcher.metainfo.xml /app/share/metainfo/com.kojalytics.artcraft-launcher.metainfo.xml
       - mkdir -p /app/share/icons /app/share/doc && cp -R share/icons/hicolor /app/share/icons/ && cp -R share/doc/artcraft-launcher /app/share/doc/
     sources:
       - type: dir

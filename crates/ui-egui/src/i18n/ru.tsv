@@ -39,7 +39,6 @@
 	Latest version	Последняя версия
 	Newest release	Новый релиз
 	Discord	Discord
-	GitHub	GitHub
 	Website	Веб-сайт
 	Classic apps	Классические приложения
 	New apps	Новые приложения
@@ -70,7 +69,6 @@
 	Show in Files	Показать в файловом менеджере
 	Reinstall	Переустановить
 	Uninstall…	Удалить…
-	All releases	Все релизы
 	Kojalytics Launcher {version} is available.	Доступен Kojalytics Launcher {version}.
 	Dismiss	Закрыть
 	Update and restart	Обновить и перезапустить
@@ -79,7 +77,6 @@
 	What's new	Что нового
 	No notes were published with this release.	Заметки к этому релизу не публиковались.
 	Released {date}	Релиз {date}
-	Open on GitHub	Открыть на GitHub
 	Close	Закрыть
 	Kojalytics Launcher {version}	Kojalytics Launcher {version}
 	Only when I ask	Только по запросу
@@ -230,7 +227,6 @@ month	Dec	дек.
 	Checking for updates…	Проверка обновлений…
 	Downloads the new version, replaces this one and opens it again	Скачивает новую версию, заменяет текущую и открывает её заново
 	Couldn't check for updates: {f}	Не удалось проверить обновления: {f}
-	GitHub repository	Репозиторий GitHub
 	Kojalytics	Kojalytics
 	Update 1 app	Обновить 1 приложение
 	Update all ({count})	Обновить все ({count})
@@ -325,7 +321,6 @@ filter	Installed	Установлены
 	Show Kojalytics Launcher	Показать Kojalytics Launcher
 	Check for Updates	Проверить обновления
 	Visit kojalytics.com	Открыть kojalytics.com
-	Kojalytics on GitHub	Kojalytics на GitHub
 	Join the Kojalytics Discord	Присоединиться к Discord Kojalytics
 	App details	О приложении
 	Close (Esc)	Закрыть (Esc)
@@ -333,7 +328,6 @@ filter	Installed	Установлены
 	Latest release	Последний релиз
 	Version	Версия
 	Platforms	Платформы
-	Releases	Релизы
 	Enlarge picture	Увеличить изображение
 	Click to enlarge	Нажмите, чтобы увеличить
 	Previous picture (←)	Предыдущее изображение (←)

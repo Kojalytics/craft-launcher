@@ -41,7 +41,6 @@
 	Latest version	Neueste Version
 	Newest release	Neueste Veröffentlichung
 	Discord	Discord
-	GitHub	GitHub
 	Website	Website
 	Classic apps	Klassische Apps
 	New apps	Neue Apps
@@ -72,7 +71,6 @@
 	Show in Files	Im Dateimanager zeigen
 	Reinstall	Neu installieren
 	Uninstall…	Deinstallieren…
-	All releases	Alle Versionen
 	Kojalytics Launcher {version} is available.	Kojalytics Launcher {version} ist verfügbar.
 	Dismiss	Ausblenden
 	Update and restart	Aktualisieren und neu starten
@@ -81,7 +79,6 @@
 	What's new	Neuigkeiten
 	No notes were published with this release.	Zu dieser Version wurden keine Hinweise veröffentlicht.
 	Released {date}	Veröffentlicht am {date}
-	Open on GitHub	Auf GitHub öffnen
 	Close	Schließen
 	Kojalytics Launcher {version}	Kojalytics Launcher {version}
 	Only when I ask	Nur manuell
@@ -233,7 +230,6 @@ month	Dec	Dez.
 	Checking for updates…	Suche nach Updates…
 	Downloads the new version, replaces this one and opens it again	Lädt die neue Version herunter, ersetzt diese und öffnet sie erneut
 	Couldn't check for updates: {f}	Updates konnten nicht geprüft werden: {f}
-	GitHub repository	GitHub-Repository
 	Kojalytics	Kojalytics
 	Update 1 app	1 App aktualisieren
 	Update all ({count})	Alle aktualisieren ({count})
@@ -329,7 +325,6 @@ filter	Installed	Installiert
 	Show Kojalytics Launcher	Kojalytics Launcher anzeigen
 	Check for Updates	Nach Updates suchen
 	Visit kojalytics.com	kojalytics.com besuchen
-	Kojalytics on GitHub	Kojalytics auf GitHub
 	Join the Kojalytics Discord	Dem Kojalytics-Discord beitreten
 	App details	App-Details
 	Close (Esc)	Schließen (Esc)
@@ -337,7 +332,6 @@ filter	Installed	Installiert
 	Latest release	Neueste Version
 	Version	Version
 	Platforms	Plattformen
-	Releases	Versionen
 	Enlarge picture	Bild vergrößern
 	Click to enlarge	Zum Vergrößern klicken
 	Previous picture (←)	Vorheriges Bild (←)

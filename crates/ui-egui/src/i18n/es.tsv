@@ -41,7 +41,6 @@
 	Latest version	Última versión
 	Newest release	Publicación más reciente
 	Discord	Discord
-	GitHub	GitHub
 	Website	Sitio web
 	Classic apps	Aplicaciones clásicas
 	New apps	Aplicaciones nuevas
@@ -72,7 +71,6 @@
 	Show in Files	Mostrar en Archivos
 	Reinstall	Reinstalar
 	Uninstall…	Desinstalar…
-	All releases	Todas las versiones
 	Kojalytics Launcher {version} is available.	Kojalytics Launcher {version} está disponible.
 	Dismiss	Descartar
 	Update and restart	Actualizar y reiniciar
@@ -81,7 +79,6 @@
 	What's new	Novedades
 	No notes were published with this release.	Esta versión no se publicó con notas.
 	Released {date}	Publicada el {date}
-	Open on GitHub	Abrir en GitHub
 	Close	Cerrar
 	Kojalytics Launcher {version}	Kojalytics Launcher {version}
 	Only when I ask	Solo cuando lo pida
@@ -227,7 +224,6 @@ month	Dec	dic.
 	Downloads the new version, replaces this one and opens it again	Descarga la versión nueva, reemplaza esta y vuelve a abrirla
 	Couldn't check for updates: {f}	No se pudieron buscar actualizaciones: {f}
 	Website (coming soon)	Sitio web (próximamente)
-	GitHub repository	Repositorio en GitHub
 	Kojalytics	Kojalytics
 	Update 1 app	Actualizar 1 aplicación
 	Update all ({count})	Actualizar todas ({count})
@@ -258,7 +254,6 @@ filter	Installed	Instaladas
 	Latest release	Última versión
 	Version	Versión
 	Platforms	Plataformas
-	Releases	Versiones
 	Enlarge picture	Ampliar imagen
 	Click to enlarge	Haz clic para ampliar
 	Previous picture (←)	Imagen anterior (←)
@@ -323,7 +318,6 @@ filter	Installed	Instaladas
 	Show Kojalytics Launcher	Mostrar Kojalytics Launcher
 	Check for Updates	Buscar actualizaciones
 	Visit kojalytics.com	Visitar kojalytics.com
-	Kojalytics on GitHub	Kojalytics en GitHub
 	Join the Kojalytics Discord	Únete al Discord de Kojalytics
 @plural	Kojalytics Launcher · {n} update available|Kojalytics Launcher · {n} updates available	Kojalytics Launcher · {n} actualización disponible|Kojalytics Launcher · {n} actualizaciones disponibles
 	Install folder	Carpeta de instalación
