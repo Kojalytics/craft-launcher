@@ -171,7 +171,15 @@ const RESCAN_EVERY: i64 = 5 * 60;
 const RESCAN_ON_FOCUS_AFTER: i64 = 30;
 
 impl LauncherUi {
+    /// The launcher as buyers see it: only the apps in [`artcraft_launcher_core::catalog::LISTED`].
     pub fn new(ctx: &egui::Context, backend: Box<dyn Backend>, settings: Settings) -> Self {
+        let mut ui = Self::new_with_all_apps(ctx, backend, settings);
+        ui.entries.retain(|e| artcraft_launcher_core::catalog::LISTED.contains(&e.app.id));
+        ui
+    }
+
+    /// Every app of the suite, released or not (tests and development).
+    pub fn new_with_all_apps(ctx: &egui::Context, backend: Box<dyn Backend>, settings: Settings) -> Self {
         let lang = effective_lang(&settings.language);
         let cjk_font = lang.needs_cjk_font().then_some(lang);
         theme::install_fonts(ctx, cjk_font);

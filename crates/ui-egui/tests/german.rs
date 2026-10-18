@@ -126,7 +126,7 @@ fn harness_language(
                 } else {
                     artcraft_launcher_ui_egui::theme::ThemeChoice::Light
                 };
-                *state = Some(LauncherUi::new(ui.ctx(), Box::new(b), s));
+                *state = Some(LauncherUi::new_with_all_apps(ui.ctx(), Box::new(b), s));
             }
             if let Some(l) = state.as_mut() {
                 l.logic(&ui.ctx().clone(), &mut NoHost);

@@ -261,7 +261,7 @@ fn harness_full(
                 } else {
                     artcraft_launcher_ui_egui::theme::ThemeChoice::Light
                 };
-                *state = Some(LauncherUi::new(ui.ctx(), b, s));
+                *state = Some(LauncherUi::new_with_all_apps(ui.ctx(), b, s));
             }
             if let Some(l) = state.as_mut() {
                 l.logic(&ui.ctx().clone(), &mut HeaderHost(bar));
@@ -303,7 +303,7 @@ fn folder_harness(picked: Rc<RefCell<Option<String>>>) -> (Harness<'static, Opti
     let harness = Harness::builder().with_size(egui::vec2(1180.0, 900.0)).build_ui_state(
         move |ui, state: &mut Option<LauncherUi>| {
             if let Some(backend) = backend.take() {
-                *state = Some(LauncherUi::new(ui.ctx(), Box::new(backend), Settings { notify: false, ..Default::default() }));
+                *state = Some(LauncherUi::new_with_all_apps(ui.ctx(), Box::new(backend), Settings { notify: false, ..Default::default() }));
             }
             if let Some(launcher) = state {
                 launcher.logic(ui.ctx(), &mut host);
@@ -440,7 +440,7 @@ fn keeps_working_with_no_window_then_draws_in_a_new_one() {
     let backend =
         Fake { events: events(), sent: sent.clone(), manage: true, pictures: Rc::default(), asked: Vec::new(), clock: Rc::new(Cell::new(NOW)) };
     let windowless = egui::Context::default();
-    let mut ui = LauncherUi::new(&windowless, Box::new(backend), Settings { notify: false, ..Settings::default() });
+    let mut ui = LauncherUi::new_with_all_apps(&windowless, Box::new(backend), Settings { notify: false, ..Settings::default() });
     // No window: the backend's news is still taken in.
     ui.logic(&windowless, &mut NoHost);
     assert!(sent.borrow().contains(&Command::CheckForUpdates { force: false }));
@@ -887,7 +887,7 @@ fn looks_again_at_installed_apps_every_few_minutes_not_every_frame() {
             if state.is_none()
                 && let Some(b) = backend.take()
             {
-                *state = Some(LauncherUi::new(ui.ctx(), Box::new(b), Settings { notify: false, ..Settings::default() }));
+                *state = Some(LauncherUi::new_with_all_apps(ui.ctx(), Box::new(b), Settings { notify: false, ..Settings::default() }));
             }
             if let Some(l) = state.as_mut() {
                 l.logic(&ui.ctx().clone(), &mut NoHost);
@@ -953,7 +953,7 @@ fn the_launcher_updates_itself_and_quits_to_restart() {
             if state.is_none()
                 && let Some(b) = backend.take()
             {
-                *state = Some(LauncherUi::new(ui.ctx(), Box::new(b), Settings { notify: false, ..Settings::default() }));
+                *state = Some(LauncherUi::new_with_all_apps(ui.ctx(), Box::new(b), Settings { notify: false, ..Settings::default() }));
             }
             if let Some(l) = state.as_mut() {
                 l.logic(&ui.ctx().clone(), &mut host);
@@ -1032,7 +1032,7 @@ fn feed_announcements_and_alerts_show_until_dismissed() {
             if state.is_none()
                 && let Some(b) = backend.take()
             {
-                *state = Some(LauncherUi::new(ui.ctx(), Box::new(b), Settings { notify: false, ..Settings::default() }));
+                *state = Some(LauncherUi::new_with_all_apps(ui.ctx(), Box::new(b), Settings { notify: false, ..Settings::default() }));
             }
             if let Some(l) = state.as_mut() {
                 l.logic(&ui.ctx().clone(), &mut NoHost);
@@ -1080,7 +1080,7 @@ fn automatic_updates_queue_installs_for_outdated_apps_and_launcher() {
             if state.is_none()
                 && let Some(b) = backend.take()
             {
-                *state = Some(LauncherUi::new(ui.ctx(), Box::new(b), Settings { auto_update: true, notify: false, ..Settings::default() }));
+                *state = Some(LauncherUi::new_with_all_apps(ui.ctx(), Box::new(b), Settings { auto_update: true, notify: false, ..Settings::default() }));
             }
             if let Some(l) = state.as_mut() {
                 l.logic(&ui.ctx().clone(), &mut NoHost);
@@ -1109,7 +1109,7 @@ fn automatic_updates_are_disabled_by_default() {
             if state.is_none()
                 && let Some(b) = backend.take()
             {
-                *state = Some(LauncherUi::new(ui.ctx(), Box::new(b), Settings { auto_update: false, notify: false, ..Settings::default() }));
+                *state = Some(LauncherUi::new_with_all_apps(ui.ctx(), Box::new(b), Settings { auto_update: false, notify: false, ..Settings::default() }));
             }
             if let Some(l) = state.as_mut() {
                 l.logic(&ui.ctx().clone(), &mut NoHost);
@@ -1136,7 +1136,7 @@ fn the_footer_names_the_services_behind_what_is_on_screen() {
                 if state.is_none()
                     && let Some(b) = backend.take()
                 {
-                    *state = Some(LauncherUi::new(ui.ctx(), Box::new(b), Settings { notify: false, ..Settings::default() }));
+                    *state = Some(LauncherUi::new_with_all_apps(ui.ctx(), Box::new(b), Settings { notify: false, ..Settings::default() }));
                 }
                 if let Some(l) = state.as_mut() {
                     l.logic(&ui.ctx().clone(), &mut NoHost);
@@ -1186,7 +1186,7 @@ fn custom_title_bar_has_window_buttons() {
             if state.is_none()
                 && let Some(b) = backend.take()
             {
-                *state = Some(LauncherUi::new(ui.ctx(), Box::new(b), Settings { notify: false, ..Settings::default() }));
+                *state = Some(LauncherUi::new_with_all_apps(ui.ctx(), Box::new(b), Settings { notify: false, ..Settings::default() }));
             }
             if let Some(l) = state.as_mut() {
                 l.logic(&ui.ctx().clone(), &mut FramelessHost);
@@ -1476,7 +1476,7 @@ fn the_rate_limit_notice_never_runs_under_the_footer_links() {
                 if state.is_none()
                     && let Some(b) = backend.take()
                 {
-                    *state = Some(LauncherUi::new(ui.ctx(), Box::new(b), Settings { notify: false, ..Settings::default() }));
+                    *state = Some(LauncherUi::new_with_all_apps(ui.ctx(), Box::new(b), Settings { notify: false, ..Settings::default() }));
                 }
                 if let Some(l) = state.as_mut() {
                     l.logic(&ui.ctx().clone(), &mut NoHost);
@@ -1571,7 +1571,7 @@ fn short_window(reduce: Rc<Cell<bool>>) -> Harness<'static, Option<LauncherUi>> 
                 && let Some(b) = backend.take()
             {
                 let settings = Settings { view: ViewMode::Grid, notify: false, ..Settings::default() };
-                *state = Some(LauncherUi::new(ui.ctx(), Box::new(b), settings));
+                *state = Some(LauncherUi::new_with_all_apps(ui.ctx(), Box::new(b), settings));
             }
             if let Some(l) = state.as_mut() {
                 l.logic(&ui.ctx().clone(), &mut host);
