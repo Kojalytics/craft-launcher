@@ -1037,9 +1037,9 @@ pub mod macos {
         Ok(user)
     }
 
-    /// The Apple Developer team that signs every Craft App and Kojalytics Launcher (Learning
-    /// Machines LLC): the macOS side of the Windows publisher check.
-    pub const TEAM_ID: &str = "DJ6XS33FX8";
+    /// The Apple Developer team that signs every Koja app and the Kojalytics Launcher (Farzad
+    /// Khojazada): the macOS side of the Windows publisher check.
+    pub const TEAM_ID: &str = "SF4KRG2343";
 
     /// What a new copy must prove before it replaces anything. The checksum shows the download is
     /// the file the release lists; these show the app inside is the one the release promises.
