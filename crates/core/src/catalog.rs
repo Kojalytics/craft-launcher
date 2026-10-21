@@ -96,7 +96,10 @@ const fn app(
 
 /// The apps the launcher shows: those with a released Koja version. Add an app's id here once its
 /// Kojalytics release is published; the others stay hidden until then.
-pub const LISTED: &[&str] = &["wordcraft", "gridcraft", "deckcraft"];
+pub const LISTED: &[&str] = &[
+    "wordcraft", "gridcraft", "deckcraft", "pdfcraft", "photocraft", "lightcraft", "vectorcraft",
+    "designcraft", "figcraft", "filmcraft", "effectcraft", "soundcraft", "cadcraft",
+];
 
 /// The Koja App Suite, in display order: the seven classic apps, then the six new ones.
 pub const SUITE: [CraftApp; 13] = [
