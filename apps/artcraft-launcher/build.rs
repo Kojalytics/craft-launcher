@@ -15,7 +15,7 @@ fn main() {
     res.set_icon("../../assets/app-icon/artcraft-launcher.ico")
         .set("ProductName", "Kojalytics Launcher")
         .set("FileDescription", "Kojalytics Launcher")
-        .set("CompanyName", "Learning Machines LLC")
+        .set("CompanyName", "Kojalytics")
         .set("LegalCopyright", "Copyright (c) the Kojalytics Launcher authors. MIT OR Apache-2.0.")
         .set("OriginalFilename", "artcraft-launcher.exe")
         .set("InternalName", "artcraft-launcher");

@@ -1,7 +1,7 @@
 //! Finding Koja Apps that are already installed, however they got there.
 //!
 //! - macOS: `<App>.app` in `/Applications` or `~/Applications`, read from its `Info.plist`.
-//! - Windows: the Windows Installer's uninstall entries (`Learning Machines LLC`), and portable
+//! - Windows: the Windows Installer's uninstall entries (publisher `Kojalytics`), and portable
 //!   copies the launcher unpacked.
 //! - Linux: AppImages in `~/Applications` (where the launcher and AppImageLauncher put them),
 //!   `~/AppImages` (Gear Lever) and `~/.local/bin`, Debian/RPM packages, Flatpaks, and tarball
@@ -88,9 +88,10 @@ pub(crate) fn appimage_version(name: &str, stems: &[&str]) -> Option<Option<Stri
     (parsed.kind == artcraft_launcher_core::PackageKind::AppImage && parsed.token.starts_with("linux-")).then_some(Some(parsed.version))
 }
 
-/// Who our Windows Installer packages name as their publisher.
+/// Who our Windows Installer packages name as their publisher (`Manufacturer` in packaging/windows/*.wxs).
+/// ArtCraft's own installs of the same apps say "Learning Machines LLC" and are not ours.
 #[cfg_attr(not(windows), allow(dead_code))]
-const PUBLISHER: &str = "Learning Machines LLC";
+const PUBLISHER: &str = "Kojalytics";
 
 /// Whether an uninstall entry's `DisplayName` and `Publisher` are `app`'s, under any name its
 /// installers have registered.
@@ -568,7 +569,7 @@ mod tests {
         );
     }
 
-    const LEARNING_MACHINES: &str = "Learning Machines LLC";
+    const KOJALYTICS: &str = "Kojalytics";
 
     fn roots() -> Vec<PathBuf> {
         vec![PathBuf::from(r"C:\Program Files"), PathBuf::from(r"C:\Program Files (x86)")]
@@ -577,22 +578,22 @@ mod tests {
     #[test]
     fn pdfcraft_matches_its_former_printcraft_installer_name() {
         let pdf = CraftApp::by_id("pdfcraft").unwrap();
-        assert!(is_installer_entry(pdf, "PrintCraft", LEARNING_MACHINES), "a PrintCraft entry from {LEARNING_MACHINES} should be PdfKoja's");
+        assert!(is_installer_entry(pdf, "PrintCraft", KOJALYTICS), "a PrintCraft entry from {KOJALYTICS} should be PdfKoja's");
     }
 
     #[test]
     fn pdfcraft_still_matches_its_own_installer_name() {
         let pdf = CraftApp::by_id("pdfcraft").unwrap();
-        assert!(is_installer_entry(pdf, "PdfKoja", LEARNING_MACHINES));
+        assert!(is_installer_entry(pdf, "PdfKoja", KOJALYTICS));
     }
 
     #[test]
     fn printcraft_entries_match_nothing_else() {
         let pdf = CraftApp::by_id("pdfcraft").unwrap();
         assert!(!is_installer_entry(pdf, "PrintCraft", "Some Other Publisher"));
-        assert!(!is_installer_entry(pdf, "PhotoKoja", LEARNING_MACHINES));
+        assert!(!is_installer_entry(pdf, "PhotoKoja", KOJALYTICS));
         for a in SUITE.iter().filter(|a| a.id != "pdfcraft") {
-            assert!(!is_installer_entry(a, "PrintCraft", LEARNING_MACHINES), "PrintCraft matched {}", a.name);
+            assert!(!is_installer_entry(a, "PrintCraft", KOJALYTICS), "PrintCraft matched {}", a.name);
         }
     }
 
@@ -616,9 +617,10 @@ mod tests {
         let roots = roots();
         let location = PathBuf::from(r"D:\Apps\Somewhere");
         for a in SUITE.iter().filter(|a| a.former_ids.is_empty() && a.former_names.is_empty()) {
-            assert!(is_installer_entry(a, a.name, LEARNING_MACHINES), "{}", a.name);
+            assert!(is_installer_entry(a, a.name, KOJALYTICS), "{}", a.name);
             assert!(!is_installer_entry(a, a.name, "Some Other Publisher"), "{}", a.name);
-            assert!(!is_installer_entry(a, &a.name.to_lowercase(), LEARNING_MACHINES), "{}", a.name);
+            assert!(!is_installer_entry(a, a.name, "Learning Machines LLC"), "ArtCraft's installer is not {}", a.name);
+            assert!(!is_installer_entry(a, &a.name.to_lowercase(), KOJALYTICS), "{}", a.name);
             let exe = format!("{}.exe", a.id);
             let in_program_files: Vec<PathBuf> = roots.iter().map(|r| r.join(a.name).join(&exe)).collect();
             assert_eq!(exe_candidates(a, None, &roots), in_program_files);

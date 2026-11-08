@@ -55,7 +55,7 @@ if (-not $haveCert -and -not $haveAzure) {
 }
 
 $script:SignTool = Find-SignTool
-$common = @('sign', '/v', '/fd', 'SHA256', '/td', 'SHA256', '/d', 'ArtCraft Launcher', '/du', 'https://github.com/storytold/craft-launcher')
+$common = @('sign', '/v', '/fd', 'SHA256', '/td', 'SHA256', '/d', 'Kojalytics Launcher', '/du', 'https://www.kojalytics.com/software')
 $tmp = Join-Path ([IO.Path]::GetTempPath()) "artcraft-launcher-sign-$PID"
 New-Item -ItemType Directory -Force -Path $tmp | Out-Null
 

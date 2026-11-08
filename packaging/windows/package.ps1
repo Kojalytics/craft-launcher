@@ -1,10 +1,11 @@
 <#
 .SYNOPSIS
-  Build, sign and package ArtCraft Launcher for Windows.
+  Build, sign and package Kojalytics Launcher for Windows.
 
 .DESCRIPTION
   Produces, in $env:DIST (default: dist/release):
-    artcraft-launcher-<version>-windows-<arch>.msi            per-user installer with a setup wizard (WiX v5)
+    artcraft-launcher-<version>-windows-<arch>.msi            per-user installer with a German setup wizard (WiX v5)
+    Kojalytics-Launcher.msi                                   the same MSI (x64) under the name kojalytics.com links to
     artcraft-launcher-<version>-windows-<arch>-portable.zip   artcraft-launcher.exe + portable.txt
 
   The binary links the C runtime statically (+crt-static), so neither the MSI nor the portable
@@ -29,7 +30,7 @@ $Root = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
 
 # ---- app-specific values ----------------------------------------------------------------------
 $Pkg = 'artcraft-launcher'          # cargo package and binary
-$AppName = 'ArtCraft Launcher'      # display name
+$AppName = 'Kojalytics Launcher'    # display name
 
 function Invoke-Native([string] $What, [scriptblock] $Block) {
   Write-Output "==> $What"
@@ -95,25 +96,24 @@ Copy-Item (Join-Path $Bin $Exe) $Stage
 & (Join-Path $PSScriptRoot 'sign.ps1') (Join-Path $Stage $Exe)
 
 # ---- MSI ---------------------------------------------------------------------------------------
-# The setup wizard's art, drawn here (System.Drawing) in getartcraft.com's style so the MSI shows
-# ArtCraft rather than WiX's stock bitmaps. Both must be 24-bit BMPs:
+# The setup wizard's art, drawn here (System.Drawing) so the MSI shows Kojalytics rather than WiX's
+# stock bitmaps. Both must be 24-bit BMPs:
 #   - dialog, 493x312: the Welcome and Finish pages' backdrop. Their text sits on the right, so
-#     that stays white; the left panel is ours: the blue ArtCraft mark, the white wordmark, a mono
-#     "Launcher" label and the Craft apps' icons in a hairline grid.
+#     that stays white; the left panel is ours: the launcher icon, the white Kojalytics logo, a mono
+#     "Launcher" label and the Koja apps' icons in a hairline grid.
 #   - banner, 493x58: across the top of the inner pages. The page title is drawn over its left
 #     side, so that stays white; the right end is a dark cell with the mark.
-# The ArtCraft mark and wordmark are drawn as supplied (docs/brand/LICENSE-brand.txt).
 function New-InstallerArt([string] $BannerOut, [string] $DialogOut) {
   Add-Type -AssemblyName System.Drawing
   $ink = [System.Drawing.ColorTranslator]::FromHtml('#121316')
-  $accent = [System.Drawing.ColorTranslator]::FromHtml('#2d81ff')
+  $accent = [System.Drawing.ColorTranslator]::FromHtml('#6366f1')
   $muted = [System.Drawing.Color]::FromArgb(153, 242, 241, 238)
   $line = [System.Drawing.Color]::FromArgb(38, 242, 241, 238)
-  # The Craft App Suite, in the launcher's order (crates/core/src/catalog.rs).
+  # The Koja apps, in the launcher's order (crates/core/src/catalog.rs).
   $apps = 'photocraft', 'vectorcraft', 'filmcraft', 'lightcraft', 'pdfcraft', 'effectcraft',
     'designcraft', 'wordcraft', 'deckcraft', 'gridcraft', 'cadcraft', 'soundcraft', 'figcraft'
   $mark = [System.Drawing.Image]::FromFile((Join-Path $Root 'assets\app-icon\hicolor\256x256\apps\com.kojalytics.artcraft-launcher.png'))
-  $wordmark = [System.Drawing.Image]::FromFile((Join-Path $Root 'docs\brand\artcraft-logo-white.png'))
+  $wordmark = [System.Drawing.Image]::FromFile((Join-Path $Root 'docs\brand\kojalytics-logo-white.png'))
   $icons = $apps | ForEach-Object { [System.Drawing.Image]::FromFile((Join-Path $Root "assets\app-icons\$_.png")) }
   # The site's label face; GDI+ draws a variable font at its default instance (Regular).
   $fonts = New-Object System.Drawing.Text.PrivateFontCollection
@@ -177,7 +177,7 @@ $Msi = Join-Path $Dist "$Pkg-$Version-windows-$Arch.msi"
 Invoke-Native 'wix build' {
   wix build (Join-Path $PSScriptRoot "$Pkg.wxs") -arch $Arch `
     -ext WixToolset.UI.wixext -ext WixToolset.Util.wixext `
-    -culture en-US -loc (Join-Path $PSScriptRoot "$Pkg.en-us.wxl") `
+    -culture de-DE -loc (Join-Path $PSScriptRoot "$Pkg.de-de.wxl") `
     -d "Version=$MsiVersion" -d "DisplayVersion=$Version" -d "BinDir=$Stage" -d "IconPath=$(Join-Path $Root "assets\app-icon\$Pkg.ico")" `
     -d "BannerBmp=$Banner" -d "DialogBmp=$Dialog" `
     -o $Msi
@@ -188,18 +188,20 @@ Invoke-Native 'MSI shortcut icon validation (ICE50)' {
 # wix writes its debug symbols (.wixpdb) next to the MSI; keep them out of the release assets.
 Remove-Item -Force -ErrorAction SilentlyContinue ([IO.Path]::ChangeExtension($Msi, '.wixpdb'))
 & (Join-Path $PSScriptRoot 'sign.ps1') $Msi
+# kojalytics.com/download/windows points at releases/latest/download/Kojalytics-Launcher.msi.
+if ($Arch -eq 'x64') { Copy-Item $Msi (Join-Path $Dist 'Kojalytics-Launcher.msi') -Force }
 
 # ---- portable zip ------------------------------------------------------------------------------
 $Portable = Join-Path $TargetDir "windows-package\$Pkg-$Version-windows-$Arch-portable"
 Remove-Item -Recurse -Force $Portable -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Force -Path $Portable | Out-Null
 Copy-Item (Join-Path $Stage $Exe) $Portable
-foreach ($f in 'README.md', 'LICENSE-MIT', 'LICENSE-APACHE', 'NOTICE', 'ATTRIBUTION.md') {
+foreach ($f in 'LICENSE-MIT', 'LICENSE-APACHE', 'NOTICE', 'ATTRIBUTION.md') {
   $p = Join-Path $Root $f
   if (Test-Path $p) { Copy-Item $p $Portable }
 }
 # portable.txt beside artcraft-launcher.exe switches on portable mode: settings and the download
-# cache go to ArtCraftLauncherData\ next to the exe instead of %APPDATA%.
+# cache go to KojalyticsLauncherData\ next to the exe instead of %LOCALAPPDATA%.
 Copy-Item (Join-Path $PSScriptRoot 'portable.txt') $Portable
 $Zip = Join-Path $Dist "$Pkg-$Version-windows-$Arch-portable.zip"
 Remove-Item -Force $Zip -ErrorAction SilentlyContinue
