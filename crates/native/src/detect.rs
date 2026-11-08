@@ -100,6 +100,15 @@ fn is_installer_entry(app: &CraftApp, display_name: &str, publisher: &str) -> bo
     publisher == PUBLISHER && app.names().any(|n| n == display_name)
 }
 
+/// Whether an uninstall entry's key is a Windows Installer product code (`{GUID}`). Only those can
+/// be removed with `msiexec /x`; the shared installer UI of some apps adds a second, visible entry
+/// for Windows Settings (`Kojalytics.<id>`) with the same name, which is not the package.
+#[cfg_attr(not(windows), allow(dead_code))]
+fn is_product_code(key: &str) -> bool {
+    let Some(inner) = key.strip_prefix('{').and_then(|k| k.strip_suffix('}')) else { return false };
+    inner.len() == 36 && inner.chars().enumerate().all(|(i, c)| if [8, 13, 18, 23].contains(&i) { c == '-' } else { c.is_ascii_hexdigit() })
+}
+
 /// Where a Windows install of `app` may keep its exe, in the order to try: the entry's
 /// `InstallLocation`, then `<App>` under each Program Files root for each name the app has had,
 /// and in each folder `<stem>.exe` for each stem, current first. Doesn't touch the disk.
@@ -214,7 +223,7 @@ pub mod windows {
                 let Ok(key) = root.open_subkey_with_flags(&code, KEY_READ | flags) else { continue };
                 let name: String = key.get_value("DisplayName").unwrap_or_default();
                 let publisher: String = key.get_value("Publisher").unwrap_or_default();
-                if !is_installer_entry(app, &name, &publisher) || out.iter().any(|m: &MsiInstall| m.product_code == code) {
+                if !is_product_code(&code) || !is_installer_entry(app, &name, &publisher) || out.iter().any(|m: &MsiInstall| m.product_code == code) {
                     continue;
                 }
                 let version = key.get_value::<String, _>("DisplayVersion").ok().and_then(|v| version::parse(&v));
@@ -573,6 +582,15 @@ mod tests {
 
     fn roots() -> Vec<PathBuf> {
         vec![PathBuf::from(r"C:\Program Files"), PathBuf::from(r"C:\Program Files (x86)")]
+    }
+
+    #[test]
+    fn only_windows_installer_product_codes_are_packages() {
+        assert!(is_product_code("{8C915D36-F29E-4653-9C08-1132953C4650}"));
+        assert!(is_product_code("{8c915d36-f29e-4653-9c08-1132953c4650}"));
+        for other in ["Kojalytics.designcraft", "Craft.designcraft", "8C915D36-F29E-4653-9C08-1132953C4650", "{8C915D36-F29E-4653-9C08-1132953C465}", "{}"] {
+            assert!(!is_product_code(other), "{other}");
+        }
     }
 
     #[test]
