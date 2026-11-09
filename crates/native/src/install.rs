@@ -2217,4 +2217,45 @@ mod tests {
             assert!(signed_by(Path::new(&app), TEAM_ID), "{app} isn't signed by {TEAM_ID}");
         }
     }
+
+    /// What a customer's launcher does on Windows, against the live release feed: pick the app's
+    /// MSI, download and check it, install it with the Windows Installer, find it the way the
+    /// launcher does, install it once more over itself (an update), then remove it.
+    /// `KOJA_E2E_APP=soundcraft cargo test -p artcraft-launcher-native -- --ignored windows_end_to_end`
+    #[cfg(windows)]
+    #[test]
+    #[ignore = "installs a real Koja app with the Windows Installer: run it on a throwaway Windows machine"]
+    fn windows_end_to_end_install_detect_update_remove() {
+        use artcraft_launcher_core::feed::{FEED_URL, Feed, FeedAnswer};
+        use artcraft_launcher_core::platform::{Platform, pick_asset};
+        let id = std::env::var("KOJA_E2E_APP").unwrap_or_else(|_| "soundcraft".into());
+        let app = CraftApp::by_id(&id).expect("a Koja app id");
+        let http = Http::new().unwrap();
+        let feed = Feed::parse(&http.get_feed(FEED_URL).map_err(|e| e.why).unwrap()).expect("the release feed");
+        let FeedAnswer::Fresh(Some(release)) = feed.answer(app, crate::now()) else { panic!("no fresh release of {} in the feed", app.name) };
+        let platform = Platform::current().unwrap();
+        let stems: Vec<&str> = app.stems().collect();
+        let (asset, kind) = pick_asset(&release, &stems, platform, platform.default_kinds()).expect("a Windows file in the release");
+        assert_eq!(kind, PackageKind::Msi, "{}", asset.name);
+        let dir = tempfile::tempdir().unwrap();
+        let paths = Paths::under(dir.path());
+        for round in ["install", "update"] {
+            let existing = crate::detect::windows::detect(app);
+            let mut phase = |_| {};
+            let mut job = Job {
+                http: &http,
+                paths: &paths,
+                stop: &Stop::default(),
+                phase: &mut phase,
+                install_locations: &InstallLocations::default(),
+                replace: false,
+            };
+            install(app, &release, asset, kind, existing.as_ref(), None, &mut job).unwrap_or_else(|e| panic!("{round}: {e}"));
+            let found = crate::detect::windows::detect(app).unwrap_or_else(|| panic!("{round}: {} not found after installing", app.name));
+            assert_eq!(found.version, release.version, "{round}");
+            assert!(Path::new(&found.location).is_file(), "{round}: {}", found.location);
+        }
+        windows::uninstall_msi(app, &Stop::default(), &mut |_| {}).unwrap();
+        assert!(crate::detect::windows::detect(app).is_none(), "{} still registered after removing it", app.name);
+    }
 }

@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ArtCraft Launcher MSI (WiX Toolset v5: `dotnet tool install -g wix`, plus the UI and Util
+  Kojalytics Launcher MSI (WiX Toolset v5: `dotnet tool install -g wix`, plus the UI and Util
   extensions: `wix extension add -g WixToolset.UI.wixext/5.0.2 WixToolset.Util.wixext/5.0.2`).
   Built by package.ps1:
 
     wix build artcraft-launcher.wxs -arch x64 -ext WixToolset.UI.wixext -ext WixToolset.Util.wixext
-      -culture en-US -loc artcraft-launcher.en-us.wxl -d Version=1.2.3 -d DisplayVersion=1.2.3-rc.1
+      -culture de-DE -loc artcraft-launcher.de-de.wxl -d Version=1.2.3 -d DisplayVersion=1.2.3-rc.1
       -d BinDir=... -d IconPath=... -d BannerBmp=... -d DialogBmp=... -o out.msi
 
-  Per-user install (no UAC prompt), by default into %LOCALAPPDATA%\Programs\ArtCraft Launcher, so
+  Per-user install (no UAC prompt), by default into %LOCALAPPDATA%\Programs\Kojalytics Launcher, so
   the launcher can update itself without elevation, plus a Start Menu shortcut. The shortcut
   carries the AppUserModelID com.kojalytics.artcraft-launcher, which Windows needs to show toast
   notifications from an unpackaged app and to group the taskbar button. No file associations.
 
   Double-clicked, it opens a setup wizard that names the version: Welcome; a folder page to pick
   where it goes, with a "Create a desktop shortcut" box; Ready; a progress page; and a Finish page
-  with a ticked "Launch ArtCraft Launcher" box. There is no licence page (the code is MIT OR
+  with a ticked "Kojalytics Launcher starten" box. The wizard speaks German (de-DE). There is no licence page (the code is MIT OR
   Apache-2.0; nothing to accept). The install folder and the desktop-shortcut choice are recorded
   under HKCU and reused by later versions, so an update (the launcher's own self-update runs this
   with /passive, which skips the wizard) lands in the same folder and keeps the user's choice; the
@@ -27,39 +27,40 @@
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
      xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
   <Package
-      Name="ArtCraft Launcher"
-      Manufacturer="Learning Machines LLC"
+      Name="Kojalytics Launcher"
+      Manufacturer="Kojalytics"
       Version="$(var.Version)"
-      UpgradeCode="1AC08DBF-D4CF-4BA4-A81E-CAA5C1004974"
+      UpgradeCode="A7905C5F-2A81-5085-9DE9-9806C3A02609"
       Scope="perUser"
       Compressed="yes"
-      Language="1033">
-    <SummaryInformation Description="ArtCraft Launcher: install and update the Craft App Suite" Manufacturer="Learning Machines LLC" />
+      Language="1031"
+      Codepage="1252">
+    <SummaryInformation Description="Kojalytics Launcher: Koja-Apps installieren und aktualisieren" Manufacturer="Kojalytics" />
     <!-- Same-version upgrades let successive pre-releases of one X.Y.Z replace each other
          (MSI versions are numeric, so 1.2.3-rc.1 and 1.2.3-rc.2 are both 1.2.3). -->
     <MajorUpgrade AllowSameVersionUpgrades="yes"
-        DowngradeErrorMessage="A newer version of ArtCraft Launcher is already installed." />
+        DowngradeErrorMessage="Eine neuere Version des Kojalytics Launchers ist bereits installiert." />
     <MediaTemplate EmbedCab="yes" CompressionLevel="high" />
 
     <!-- MSI caches this icon using its Id as the filename; keep the .exe extension (ICE50). -->
-    <Icon Id="ArtCraftLauncherIcon.exe" SourceFile="$(var.IconPath)" />
-    <Property Id="ARPPRODUCTICON" Value="ArtCraftLauncherIcon.exe" />
-    <Property Id="ARPURLINFOABOUT" Value="https://getartcraft.com/apps" />
-    <Property Id="ARPURLUPDATEINFO" Value="https://github.com/storytold/craft-launcher/releases" />
+    <Icon Id="KojalyticsLauncherIcon.exe" SourceFile="$(var.IconPath)" />
+    <Property Id="ARPPRODUCTICON" Value="KojalyticsLauncherIcon.exe" />
+    <Property Id="ARPURLINFOABOUT" Value="https://www.kojalytics.com/software" />
+    <Property Id="ARPURLUPDATEINFO" Value="https://www.kojalytics.com/software" />
     <Property Id="ARPHELPLINK" Value="https://www.kojalytics.com/contact" />
 
     <StandardDirectory Id="LocalAppDataFolder">
       <Directory Id="LocalProgramsFolder" Name="Programs">
-        <Directory Id="INSTALLFOLDER" Name="ArtCraft Launcher" />
+        <Directory Id="INSTALLFOLDER" Name="Kojalytics Launcher" />
       </Directory>
     </StandardDirectory>
     <StandardDirectory Id="ProgramMenuFolder" />
     <StandardDirectory Id="DesktopFolder" />
 
     <!-- An update installs where the user put the previous version (recorded by
-         ArtCraftLauncherApp below; every version since 0.1.0 records it). -->
+         KojalyticsLauncherApp below; every version since 0.1.0 records it). -->
     <Property Id="INSTALLFOLDER">
-      <RegistrySearch Id="PreviousInstallFolder" Root="HKCU" Key="Software\Learning Machines LLC\ArtCraft Launcher" Name="InstallDir" Type="raw" />
+      <RegistrySearch Id="PreviousInstallFolder" Root="HKCU" Key="Software\Kojalytics\Kojalytics Launcher" Name="InstallDir" Type="raw" />
     </Property>
 
     <!-- The desktop shortcut: the folder page's box sets INSTALLDESKTOPSHORTCUT to 1. It starts
@@ -67,7 +68,7 @@
          from a version that never asked (0.1.0, 0.1.1) adds none. A value given on the command
          line (msiexec ... INSTALLDESKTOPSHORTCUT=0 or 1) wins. -->
     <Property Id="PREVIOUSDESKTOPSHORTCUT">
-      <RegistrySearch Id="PreviousDesktopShortcut" Root="HKCU" Key="Software\Learning Machines LLC\ArtCraft Launcher" Name="DesktopShortcutChoice" Type="raw" />
+      <RegistrySearch Id="PreviousDesktopShortcut" Root="HKCU" Key="Software\Kojalytics\Kojalytics Launcher" Name="DesktopShortcutChoice" Type="raw" />
     </Property>
     <SetProperty Id="INSTALLDESKTOPSHORTCUT" Value="1" After="AppSearch" Sequence="first"
         Condition="NOT INSTALLDESKTOPSHORTCUT AND ((NOT Installed AND NOT WIX_UPGRADE_DETECTED AND NOT PREVIOUSDESKTOPSHORTCUT) OR PREVIOUSDESKTOPSHORTCUT = &quot;1&quot;)" />
@@ -77,21 +78,21 @@
     <SetProperty Id="DESKTOPSHORTCUTCHOICE" Action="RememberDesktopShortcut" Value="1" Before="InstallInitialize" Sequence="execute"
         Condition="INSTALLDESKTOPSHORTCUT = &quot;1&quot;" />
 
-    <Feature Id="Main" Title="ArtCraft Launcher" Level="1">
-      <ComponentGroupRef Id="ArtCraftLauncherFiles" />
+    <Feature Id="Main" Title="Kojalytics Launcher" Level="1">
+      <ComponentGroupRef Id="KojalyticsLauncherFiles" />
     </Feature>
 
     <!-- The setup wizard: WixUI_InstallDir without its licence page, and with our folder page
-         (ArtCraftInstallDirDlg: the stock one plus the desktop-shortcut box) in place of the stock
+         (KojaInstallDirDlg: the stock one plus the desktop-shortcut box) in place of the stock
          one. A later NewDialog on the same button wins. -->
     <ui:WixUI Id="WixUI_InstallDir" InstallDirectory="INSTALLFOLDER" />
     <UI>
-      <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="ArtCraftInstallDirDlg" Order="2" Condition="NOT Installed" />
-      <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="ArtCraftInstallDirDlg" Order="2" Condition="NOT Installed" />
-      <Publish Dialog="ExitDialog" Control="Finish" Event="DoAction" Value="LaunchArtCraftLauncher"
+      <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="KojaInstallDirDlg" Order="2" Condition="NOT Installed" />
+      <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="KojaInstallDirDlg" Order="2" Condition="NOT Installed" />
+      <Publish Dialog="ExitDialog" Control="Finish" Event="DoAction" Value="LaunchKojalyticsLauncher"
           Condition="WIXUI_EXITDIALOGOPTIONALCHECKBOX = 1 AND NOT Installed" />
 
-      <Dialog Id="ArtCraftInstallDirDlg" Width="370" Height="270" Title="!(loc.InstallDirDlg_Title)">
+      <Dialog Id="KojaInstallDirDlg" Width="370" Height="270" Title="!(loc.InstallDirDlg_Title)">
         <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17" Default="yes" Text="!(loc.WixUINext)">
           <!-- As WixUI_InstallDir does for its own folder page: take the folder, check it, go on. -->
           <Publish Event="SetTargetPath" Value="[WIXUI_INSTALLDIR]" Order="1" />
@@ -118,61 +119,61 @@
           <Publish Property="_BrowseProperty" Value="[WIXUI_INSTALLDIR]" Order="1" />
           <Publish Event="SpawnDialog" Value="BrowseDlg" Order="2" />
         </Control>
-        <Control Id="PerUserNote" Type="Text" X="20" Y="146" Width="330" Height="24" NoPrefix="yes" Text="!(loc.ArtCraftInstallDirNote)" />
+        <Control Id="PerUserNote" Type="Text" X="20" Y="146" Width="330" Height="24" NoPrefix="yes" Text="!(loc.KojaInstallDirNote)" />
 
-        <Control Id="DesktopShortcut" Type="CheckBox" X="20" Y="186" Width="330" Height="17" Property="INSTALLDESKTOPSHORTCUT" CheckBoxValue="1" Text="!(loc.ArtCraftDesktopShortcut)" />
+        <Control Id="DesktopShortcut" Type="CheckBox" X="20" Y="186" Width="330" Height="17" Property="INSTALLDESKTOPSHORTCUT" CheckBoxValue="1" Text="!(loc.KojaDesktopShortcut)" />
       </Dialog>
     </UI>
-    <!-- Our own art, drawn by package.ps1 from the ArtCraft mark and the Craft apps' icons. -->
+    <!-- Our own art, drawn by package.ps1 from the Kojalytics logo and the Koja apps' icons. -->
     <WixVariable Id="WixUIBannerBmp" Value="$(var.BannerBmp)" />
     <WixVariable Id="WixUIDialogBmp" Value="$(var.DialogBmp)" />
 
     <!-- The full version (Version is numeric, so it drops a pre-release tag), shown on the wizard's
-         pages through artcraft-launcher.en-us.wxl. -->
-    <Property Id="ArtCraftLauncherVersion" Value="$(var.DisplayVersion)" />
+         pages through artcraft-launcher.de-de.wxl. -->
+    <Property Id="KojalyticsLauncherVersion" Value="$(var.DisplayVersion)" />
 
     <!-- Finish page: say where to find the launcher, and offer to start it (ticked by default). -->
-    <Property Id="WIXUI_EXITDIALOGOPTIONALTEXT" Value="ArtCraft Launcher $(var.DisplayVersion) is installed. Start it any time from the Start menu to install and update the Craft App Suite." />
-    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Launch ArtCraft Launcher" />
+    <Property Id="WIXUI_EXITDIALOGOPTIONALTEXT" Value="Der Kojalytics Launcher $(var.DisplayVersion) ist installiert. Du findest ihn jederzeit im Startmenü. Mit ihm installierst und aktualisierst du die Koja-Apps." />
+    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Kojalytics Launcher starten" />
     <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOX" Value="1" />
-    <Property Id="WixShellExecTarget" Value="[#ArtCraftLauncherExe]" />
+    <Property Id="WixShellExecTarget" Value="[#KojalyticsLauncherExe]" />
     <!-- Runs in the wizard's own process, so the launcher starts as the user. -->
-    <CustomAction Id="LaunchArtCraftLauncher" BinaryRef="Wix4UtilCA_$(sys.BUILDARCHSHORT)" DllEntry="WixShellExec" Impersonate="yes" Return="ignore" />
+    <CustomAction Id="LaunchKojalyticsLauncher" BinaryRef="Wix4UtilCA_$(sys.BUILDARCHSHORT)" DllEntry="WixShellExec" Impersonate="yes" Return="ignore" />
   </Package>
 
   <Fragment>
-    <ComponentGroup Id="ArtCraftLauncherFiles">
-      <Component Id="ArtCraftLauncherApp" Directory="INSTALLFOLDER" Guid="55DCC431-EBEF-4C11-BABB-6D78CE0ECF4E">
-        <File Id="ArtCraftLauncherExe" Source="$(var.BinDir)\artcraft-launcher.exe" KeyPath="no" />
+    <ComponentGroup Id="KojalyticsLauncherFiles">
+      <Component Id="KojalyticsLauncherApp" Directory="INSTALLFOLDER" Guid="E0884E74-6313-554F-B2E4-BC186942120F">
+        <File Id="KojalyticsLauncherExe" Source="$(var.BinDir)\artcraft-launcher.exe" KeyPath="no" />
         <!-- Read back by the next version's installer and by the launcher (self_update.rs). -->
-        <RegistryValue Root="HKCU" Key="Software\Learning Machines LLC\ArtCraft Launcher" Name="InstallDir" Value="[INSTALLFOLDER]" Type="string" KeyPath="yes" />
-        <RegistryValue Root="HKCU" Key="Software\Learning Machines LLC\ArtCraft Launcher" Name="DesktopShortcutChoice" Value="[DESKTOPSHORTCUTCHOICE]" Type="string" />
+        <RegistryValue Root="HKCU" Key="Software\Kojalytics\Kojalytics Launcher" Name="InstallDir" Value="[INSTALLFOLDER]" Type="string" KeyPath="yes" />
+        <RegistryValue Root="HKCU" Key="Software\Kojalytics\Kojalytics Launcher" Name="DesktopShortcutChoice" Value="[DESKTOPSHORTCUTCHOICE]" Type="string" />
         <!-- Win+R "artcraft-launcher". -->
-        <RegistryValue Root="HKCU" Key="Software\Microsoft\Windows\CurrentVersion\App Paths\artcraft-launcher.exe" Value="[#ArtCraftLauncherExe]" Type="string" />
+        <RegistryValue Root="HKCU" Key="Software\Microsoft\Windows\CurrentVersion\App Paths\artcraft-launcher.exe" Value="[#KojalyticsLauncherExe]" Type="string" />
         <RemoveFolder Id="RemoveInstallFolder" Directory="INSTALLFOLDER" On="uninstall" />
         <RemoveFolder Id="RemoveLocalProgramsFolder" Directory="LocalProgramsFolder" On="uninstall" />
       </Component>
 
-      <Component Id="ArtCraftLauncherShortcut" Directory="ProgramMenuFolder" Guid="870F3DFA-BC0F-497F-85D5-A361B04826AF">
-        <Shortcut Id="StartMenuShortcut" Name="ArtCraft Launcher"
-            Description="Install and update the Craft App Suite"
-            Target="[#ArtCraftLauncherExe]" WorkingDirectory="INSTALLFOLDER"
-            Icon="ArtCraftLauncherIcon.exe" IconIndex="0">
+      <Component Id="KojalyticsLauncherShortcut" Directory="ProgramMenuFolder" Guid="3D4C5922-93CE-59A8-AB6F-D6A4ECC63253">
+        <Shortcut Id="StartMenuShortcut" Name="Kojalytics Launcher"
+            Description="Koja-Apps installieren und aktualisieren"
+            Target="[#KojalyticsLauncherExe]" WorkingDirectory="INSTALLFOLDER"
+            Icon="KojalyticsLauncherIcon.exe" IconIndex="0">
           <ShortcutProperty Key="System.AppUserModel.ID" Value="com.kojalytics.artcraft-launcher" />
         </Shortcut>
-        <RegistryValue Root="HKCU" Key="Software\Learning Machines LLC\ArtCraft Launcher" Name="StartMenuShortcut" Value="1" Type="integer" KeyPath="yes" />
+        <RegistryValue Root="HKCU" Key="Software\Kojalytics\Kojalytics Launcher" Name="StartMenuShortcut" Value="1" Type="integer" KeyPath="yes" />
       </Component>
 
       <!-- Only when the folder page's box is ticked; removed on uninstall like everything else. -->
-      <Component Id="ArtCraftLauncherDesktopShortcut" Directory="DesktopFolder" Guid="CF06DCF3-BE5A-4A2B-B3BF-F553CC6E5D60"
+      <Component Id="KojalyticsLauncherDesktopShortcut" Directory="DesktopFolder" Guid="E00C2CF5-3DA8-52EC-A3A7-2BBB587DBD49"
           Condition="INSTALLDESKTOPSHORTCUT = &quot;1&quot;">
-        <Shortcut Id="DesktopShortcut" Name="ArtCraft Launcher"
-            Description="Install and update the Craft App Suite"
-            Target="[#ArtCraftLauncherExe]" WorkingDirectory="INSTALLFOLDER"
-            Icon="ArtCraftLauncherIcon.exe" IconIndex="0">
+        <Shortcut Id="DesktopShortcut" Name="Kojalytics Launcher"
+            Description="Koja-Apps installieren und aktualisieren"
+            Target="[#KojalyticsLauncherExe]" WorkingDirectory="INSTALLFOLDER"
+            Icon="KojalyticsLauncherIcon.exe" IconIndex="0">
           <ShortcutProperty Key="System.AppUserModel.ID" Value="com.kojalytics.artcraft-launcher" />
         </Shortcut>
-        <RegistryValue Root="HKCU" Key="Software\Learning Machines LLC\ArtCraft Launcher" Name="DesktopShortcut" Value="1" Type="integer" KeyPath="yes" />
+        <RegistryValue Root="HKCU" Key="Software\Kojalytics\Kojalytics Launcher" Name="DesktopShortcut" Value="1" Type="integer" KeyPath="yes" />
       </Component>
     </ComponentGroup>
   </Fragment>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  German texts for the setup wizard (WixUI's own strings come in German with -culture de-DE).
+  The pages name the version being installed ([KojalyticsLauncherVersion] is the full version,
+  pre-release tag included, set in artcraft-launcher.wxs) and say what the launcher is for.
+-->
+<WixLocalization Culture="de-DE" Codepage="1252" xmlns="http://wixtoolset.org/schemas/v4/wxl">
+  <String Id="WelcomeDlgTitle" Value="{\WixUI_Font_Bigger}Willkommen beim [ProductName] [KojalyticsLauncherVersion]" />
+  <String Id="WelcomeDlgDescription" Value="Der Kojalytics Launcher installiert, aktualisiert und öffnet die 13 Koja-Apps: PhotoKoja, VectorKoja, WordKoja und alle weiteren.&#13;&#10;&#13;&#10;Er wird nur für dich installiert, Administratorrechte brauchst du nicht. Klicke auf Weiter." />
+  <!-- The folder page (KojaInstallDirDlg). -->
+  <String Id="InstallDirDlgTitle" Value="{\WixUI_Font_Title}Speicherort wählen" />
+  <String Id="InstallDirDlgDescription" Value="Klicke auf Weiter für den vorgeschlagenen Ordner oder auf Ändern für einen anderen." />
+  <String Id="KojaInstallDirNote" Value="Der Kojalytics Launcher wird nur für dich installiert, ohne Administratorrechte. Wähle deshalb einen Ordner, in den du schreiben darfst (nicht Programme). Updates landen im selben Ordner." />
+  <String Id="KojaDesktopShortcut" Value="Verknüpfung auf dem Desktop anlegen" />
+  <String Id="VerifyReadyDlgInstallTitle" Value="{\WixUI_Font_Title}Bereit zur Installation: [ProductName] [KojalyticsLauncherVersion]" />
+  <!-- Also shown after a repair or removal from the same wizard, so it doesn't say "installed". -->
+  <String Id="ExitDialogTitle" Value="{\WixUI_Font_Bigger}[ProductName] [KojalyticsLauncherVersion]: Assistent abgeschlossen" />
+</WixLocalization>

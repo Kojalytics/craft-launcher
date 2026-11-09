@@ -25,7 +25,7 @@ fn machine_id() -> Option<String> {
 
 #[cfg(target_os = "windows")]
 fn machine_id() -> Option<String> {
-    let out = std::process::Command::new("reg").args(["query", r"HKLM\SOFTWARE\Microsoft\Cryptography", "/v", "MachineGuid"]).output().ok()?;
+    let out = crate::process::command("reg").args(["query", r"HKLM\SOFTWARE\Microsoft\Cryptography", "/v", "MachineGuid"]).output().ok()?;
     let text = String::from_utf8_lossy(&out.stdout);
     let id = text.lines().find(|l| l.contains("MachineGuid"))?.split_whitespace().last()?.to_string();
     (!id.is_empty()).then_some(id)
