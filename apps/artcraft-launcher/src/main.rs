@@ -5,6 +5,8 @@
 #![cfg_attr(windows, windows_subsystem = "windows")]
 #![deny(clippy::unwrap_used, clippy::expect_used, clippy::panic, clippy::unimplemented, clippy::todo, clippy::unreachable)]
 
+#[cfg(target_os = "macos")]
+mod app_hiding;
 mod logging;
 mod motion;
 mod settings_file;
@@ -635,6 +637,10 @@ impl<'a> Shell<'a> {
         let mut shell = Self { launcher, window_hides, visible: true, quitting: false, applied_follow: None };
         if !visible {
             shell.put_away(&cc.egui_ctx);
+            // macOS hides the app rather than the window (see `put_away`): order the window in
+            // behind that, so a Dock click finds one to show.
+            #[cfg(target_os = "macos")]
+            cc.egui_ctx.send_viewport_cmd(egui::ViewportCommand::Visible(true));
         } else if hidden {
             cc.egui_ctx.send_viewport_cmd(egui::ViewportCommand::Visible(true));
         }
@@ -650,6 +656,7 @@ impl<'a> Shell<'a> {
             let on = self.launcher.ui.settings.show_on_current_desktop;
             spaces::follow_current_desktop(on);
             self.applied_follow = Some(on);
+            app_hiding::unhide();
         }
         if self.window_hides {
             ctx.send_viewport_cmd(egui::ViewportCommand::Visible(true));
@@ -665,6 +672,10 @@ impl<'a> Shell<'a> {
     fn put_away(&mut self, ctx: &egui::Context) {
         if self.window_hides {
             self.visible = false;
+            // macOS hides the whole app, as ⌘H does, so the Dock icon brings it back.
+            #[cfg(target_os = "macos")]
+            app_hiding::hide();
+            #[cfg(not(target_os = "macos"))]
             ctx.send_viewport_cmd(egui::ViewportCommand::Visible(false));
         } else {
             self.launcher.closed_to_tray = true;
@@ -682,6 +693,11 @@ impl<'a> Shell<'a> {
 impl eframe::App for Shell<'_> {
     fn logic(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         let requests = self.launcher.tick(ctx);
+        // A Dock click or ⌘-Tab shows a hidden launcher by itself (app_hiding.rs).
+        #[cfg(target_os = "macos")]
+        if !self.visible && !app_hiding::is_hidden() {
+            self.visible = true;
+        }
         #[cfg(target_os = "macos")]
         if self.applied_follow != Some(self.launcher.ui.settings.show_on_current_desktop) {
             let on = self.launcher.ui.settings.show_on_current_desktop;
