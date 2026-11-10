@@ -403,6 +403,9 @@ impl LauncherUi {
                     self.license_key.clear();
                     self.toast(ctx, tl!("License activated. Thank you!"), false);
                 }
+                if matches!(self.license, Some(LicenseStatus::StartingTrial)) && matches!(status, LicenseStatus::Trial { .. }) {
+                    self.toast(ctx, tl!("Your free 3-day trial has started. Install the apps you want."), false);
+                }
                 self.license = Some(status);
                 false
             }
@@ -452,7 +455,7 @@ impl LauncherUi {
                     Err(e) if e == INSTALL_CANCELLED => self.toast(ctx, tl!("Install cancelled"), false),
                     Err(e) if e == LICENSE_REQUIRED => {
                         self.dialog = Some(Dialog::Settings);
-                        self.toast(ctx, tl!("Enter your license key to install apps."), true);
+                        self.toast(ctx, tl!("Start the free trial or enter your license key to install apps."), true);
                     }
                     // The Replace dialog says it all.
                     Err(_) if matches!(&self.dialog, Some(Dialog::Replace { app: a, .. }) if *a == app) => {}

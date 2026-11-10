@@ -311,6 +311,26 @@ impl LauncherUi {
                 }
             }
             status => {
+                // The free trial first: what a new customer came for.
+                match &status {
+                    Some(LicenseStatus::Trial { expires }) => {
+                        let date = crate::views::date_text(*expires);
+                        ui.label(RichText::new(fmt(tl!("Free trial: all apps until {date}."), &[("date", &date)])).strong());
+                    }
+                    Some(LicenseStatus::TrialEnded) => {
+                        ui.label(RichText::new(tl!("Your free trial on this computer has ended.")).color(t.bad));
+                    }
+                    _ => {
+                        ui.label(RichText::new(tl!("No key yet? Try all Koja apps free for 3 days, without payment details.")).color(t.muted));
+                        ui.add_space(4.0);
+                        let starting = status == Some(LicenseStatus::StartingTrial);
+                        let label = if starting { tl!("Starting trial…") } else { tl!("Start free 3-day trial") };
+                        if widgets::button(ui, label, Kind::Primary, 0.0).clicked() && !starting {
+                            self.send(Command::StartTrial);
+                        }
+                    }
+                }
+                ui.add_space(12.0);
                 ui.label(RichText::new(tl!("Enter the license key from your purchase at kojalytics.com.")).color(t.muted));
                 ui.add_space(4.0);
                 let busy = status == Some(LicenseStatus::Activating);
@@ -327,8 +347,12 @@ impl LauncherUi {
                         self.send(Command::Activate { key: self.license_key.trim().to_string() });
                     }
                 });
-                if let Some(LicenseStatus::Failed(e)) = status {
+                if let Some(LicenseStatus::Failed(e)) = &status {
                     ui.label(RichText::new(e).color(t.bad));
+                }
+                ui.add_space(4.0);
+                if ui.link(tl!("Buy a license")).clicked() {
+                    ui.ctx().open_url(egui::OpenUrl::new_tab("https://www.kojalytics.com/software#preise"));
                 }
             }
         }

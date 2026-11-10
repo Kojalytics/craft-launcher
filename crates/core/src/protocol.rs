@@ -63,6 +63,8 @@ pub enum Command {
     },
     /// Forget this machine's license.
     Deactivate,
+    /// Start this machine's free trial (one per machine, three days).
+    StartTrial,
 }
 
 /// Whether this machine may install apps.
@@ -74,6 +76,13 @@ pub enum LicenseStatus {
     Licensed {
         hint: String,
     },
+    StartingTrial,
+    /// The free trial runs until `expires` (Unix seconds).
+    Trial {
+        expires: i64,
+    },
+    /// This machine's free trial is over.
+    TrialEnded,
     /// Activation failed: a sentence for the user.
     Failed(String),
 }

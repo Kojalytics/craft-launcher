@@ -84,6 +84,8 @@ jobs:
           for app in soundcraft photocraft; do
             KOJA_E2E_APP=$app cargo test --locked -p artcraft-launcher-native -- --ignored --exact install::tests::windows_end_to_end_install_detect_update_remove
           done
+          # A free trial on this throwaway machine, from the live license server.
+          cargo test --locked -p artcraft-launcher-native -- --ignored --exact license::tests::starts_a_free_trial_against_the_live_server
 
       - name: Build, sign, package
         shell: pwsh

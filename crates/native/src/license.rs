@@ -1,7 +1,8 @@
 //! This machine's Kojalytics license: its device hash, the saved activation certificate, and
-//! activating a key at kojalytics.com.
+//! activating a key at kojalytics.com. Also the free trial: its certificate sits next to the
+//! license (`trial.txt`), where the apps look for it too.
 
-use artcraft_launcher_core::license::{self, License};
+use artcraft_launcher_core::license::{self, License, Trial};
 use sha2::{Digest, Sha256};
 
 use crate::http::Http;
@@ -83,6 +84,45 @@ pub fn activate(http: &Http, paths: &Paths, key: &str, device: &str) -> Result<L
     Ok(license)
 }
 
+fn trial_path(paths: &Paths) -> std::path::PathBuf {
+    paths.data.join("trial.txt")
+}
+
+/// This machine's saved trial, running or over, if its certificate is valid for this machine.
+pub fn load_trial(paths: &Paths, device: &str) -> Option<Trial> {
+    let cert = std::fs::read_to_string(trial_path(paths)).ok()?;
+    match license::verify_trial(&cert, device) {
+        Ok(t) => Some(t),
+        Err(e) => {
+            log::warn!("saved trial ignored: {e}");
+            None
+        }
+    }
+}
+
+/// Starts this machine's free trial at kojalytics.com (or fetches its certificate again) and saves
+/// the certificate. An ended trial is saved too, so the apps can say it ended. The error is a
+/// sentence for the user.
+pub fn start_trial(http: &Http, paths: &Paths, device: &str) -> Result<Trial, String> {
+    let url = std::env::var("KOJALYTICS_TRIAL_URL").unwrap_or_else(|_| license::TRIAL_URL.to_string());
+    let request = serde_json::json!({
+        "device": device,
+        "deviceName": hostname(),
+        "app": "launcher",
+        "version": env!("CARGO_PKG_VERSION"),
+    });
+    let (status, text) = http.post_json(&url, &request.to_string())?;
+    let answer: serde_json::Value = serde_json::from_str(&text).unwrap_or_default();
+    if let Some(cert) = answer["certificate"].as_str() {
+        let trial = license::verify_trial(cert, device).map_err(|e| format!("The license server sent an invalid certificate ({e})."))?;
+        crate::paths::write_atomic(&trial_path(paths), cert.as_bytes())?;
+        if status == 200 {
+            return Ok(trial);
+        }
+    }
+    Err(answer["error"].as_str().map(str::to_string).unwrap_or_else(|| format!("The license server answered HTTP {status}.")))
+}
+
 fn hostname() -> Option<String> {
     let out = std::process::Command::new("hostname").output().ok()?;
     let name = String::from_utf8_lossy(&out.stdout).trim().to_string();
@@ -98,6 +138,20 @@ mod tests {
         let hash = device_hash().expect("a machine id");
         assert_eq!(hash.len(), 64);
         assert_eq!(device_hash().unwrap(), hash, "stable");
+    }
+
+    /// What a customer's launcher does on "Start free 3-day trial", against kojalytics.com. It uses up
+    /// the machine's one trial, so it runs only on throwaway machines (kojalytics-windows.yml, e2e).
+    #[test]
+    #[ignore = "starts this machine's one free trial at kojalytics.com: run it on a throwaway machine"]
+    fn starts_a_free_trial_against_the_live_server() {
+        let dir = tempfile::tempdir().unwrap();
+        let paths = Paths::under(dir.path());
+        let device = device_hash().unwrap();
+        let trial = start_trial(&Http::new().unwrap(), &paths, &device).unwrap();
+        assert!(trial.expires > crate::now(), "{trial:?}");
+        assert_eq!(trial.expires - trial.starts, 3 * 24 * 60 * 60);
+        assert_eq!(load_trial(&paths, &device), Some(trial));
     }
 
     /// `KOJALYTICS_LICENSE_URL=http://localhost:3100/api/license/activate KOJA_TEST_KEY=KOJA-… cargo test -- --ignored`
