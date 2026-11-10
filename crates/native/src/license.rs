@@ -140,6 +140,20 @@ mod tests {
         assert_eq!(device_hash().unwrap(), hash, "stable");
     }
 
+    /// What a customer's launcher does on "Start free 3-day trial", against kojalytics.com. It uses up
+    /// the machine's one trial, so it runs only on throwaway machines (kojalytics-windows.yml, e2e).
+    #[test]
+    #[ignore = "starts this machine's one free trial at kojalytics.com: run it on a throwaway machine"]
+    fn starts_a_free_trial_against_the_live_server() {
+        let dir = tempfile::tempdir().unwrap();
+        let paths = Paths::under(dir.path());
+        let device = device_hash().unwrap();
+        let trial = start_trial(&Http::new().unwrap(), &paths, &device).unwrap();
+        assert!(trial.expires > crate::now(), "{trial:?}");
+        assert_eq!(trial.expires - trial.starts, 3 * 24 * 60 * 60);
+        assert_eq!(load_trial(&paths, &device), Some(trial));
+    }
+
     /// `KOJALYTICS_LICENSE_URL=http://localhost:3100/api/license/activate KOJA_TEST_KEY=KOJA-… cargo test -- --ignored`
     #[test]
     #[ignore = "needs a license server (KOJALYTICS_LICENSE_URL) and a fresh key (KOJA_TEST_KEY)"]
