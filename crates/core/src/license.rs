@@ -4,6 +4,9 @@
 //! certificate: `base64url(JSON payload) "." base64url(Ed25519 signature of the payload part)`,
 //! signed with Kojalytics' private key. The launcher keeps the certificate and checks it offline
 //! against [`PUBLIC_KEY`] and this machine's device hash.
+//!
+//! A free trial works the same way without a key: kojalytics.com signs a [`Trial`] certificate for
+//! this machine that ends three days after the machine's first trial.
 
 use base64::Engine;
 use base64::engine::general_purpose::URL_SAFE_NO_PAD;
@@ -18,6 +21,8 @@ pub const PUBLIC_KEY: [u8; 32] = [
 
 /// Where keys are activated.
 pub const ACTIVATE_URL: &str = "https://www.kojalytics.com/api/license/activate";
+/// Where a machine's free trial starts (or its certificate is fetched again).
+pub const TRIAL_URL: &str = "https://www.kojalytics.com/api/license/trial";
 
 /// Crockford base32: no I, L, O or U.
 const ALPHABET: &str = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
@@ -32,6 +37,16 @@ pub struct License {
     pub device: String,
     /// Unix seconds.
     pub issued: i64,
+}
+
+/// What a valid trial certificate says. The machine is named `trial_device`, not `device`, so a
+/// launcher or app from before trials never takes it for a license without an end.
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
+pub struct Trial {
+    pub trial_device: String,
+    /// Unix seconds: when this machine's trial began and when it ends.
+    pub starts: i64,
+    pub expires: i64,
 }
 
 /// `koja-abcde …` → `ABCDE…` (20 characters), or `None` when it can't be a Koja key. Typing
@@ -55,17 +70,37 @@ pub fn verify(certificate: &str, device: &str) -> Result<License, String> {
 }
 
 fn verify_with(certificate: &str, device: &str, public_key: &[u8; 32]) -> Result<License, String> {
-    let (payload, signature) = certificate.trim().split_once('.').ok_or("not a license certificate")?;
-    let signature = URL_SAFE_NO_PAD.decode(signature).map_err(|_| "not a license certificate")?;
-    let signature = Signature::from_slice(&signature).map_err(|_| "not a license certificate")?;
-    let key = VerifyingKey::from_bytes(public_key).map_err(|_| "invalid public key")?;
-    key.verify_strict(payload.as_bytes(), &signature).map_err(|_| "the license certificate isn't signed by Kojalytics")?;
-    let json = URL_SAFE_NO_PAD.decode(payload).map_err(|_| "unreadable license certificate")?;
+    let json = signed_payload(certificate, public_key)?;
     let license: License = serde_json::from_slice(&json).map_err(|_| "unreadable license certificate")?;
     if license.device != device {
         return Err("the license was activated on another device".into());
     }
     Ok(license)
+}
+
+/// Checks a trial certificate's signature and that it was issued for `device`. Whether the trial
+/// is still running is the caller's question ([`Trial::expires`]).
+pub fn verify_trial(certificate: &str, device: &str) -> Result<Trial, String> {
+    verify_trial_with(certificate, device, &PUBLIC_KEY)
+}
+
+fn verify_trial_with(certificate: &str, device: &str, public_key: &[u8; 32]) -> Result<Trial, String> {
+    let json = signed_payload(certificate, public_key)?;
+    let trial: Trial = serde_json::from_slice(&json).map_err(|_| "unreadable trial certificate")?;
+    if trial.trial_device != device {
+        return Err("the trial belongs to another device".into());
+    }
+    Ok(trial)
+}
+
+/// The JSON payload of a certificate signed with `public_key`'s private half.
+fn signed_payload(certificate: &str, public_key: &[u8; 32]) -> Result<Vec<u8>, String> {
+    let (payload, signature) = certificate.trim().split_once('.').ok_or("not a license certificate")?;
+    let signature = URL_SAFE_NO_PAD.decode(signature).map_err(|_| "not a license certificate")?;
+    let signature = Signature::from_slice(&signature).map_err(|_| "not a license certificate")?;
+    let key = VerifyingKey::from_bytes(public_key).map_err(|_| "invalid public key")?;
+    key.verify_strict(payload.as_bytes(), &signature).map_err(|_| "the license certificate isn't signed by Kojalytics")?;
+    URL_SAFE_NO_PAD.decode(payload).map_err(|_| "unreadable license certificate".to_string())
 }
 
 #[cfg(test)]
@@ -102,6 +137,26 @@ mod tests {
         let tampered = format!("{}.{sig}", payload.replace('A', "B"));
         assert!(verify_with(&tampered, "dev1", &public).is_err());
         assert!(verify_with("garbage", "dev1", &public).is_err());
+    }
+
+    fn signed(signer: &SigningKey, json: &str) -> String {
+        let payload = URL_SAFE_NO_PAD.encode(json);
+        let signature = signer.sign(payload.as_bytes());
+        format!("{payload}.{}", URL_SAFE_NO_PAD.encode(signature.to_bytes()))
+    }
+
+    #[test]
+    fn a_trial_certificate_is_checked_like_a_license_and_never_passes_as_one() {
+        let signer = SigningKey::from_bytes(&[7; 32]);
+        let public = signer.verifying_key().to_bytes();
+        let trial = signed(&signer, r#"{"v":1,"trial":true,"trial_device":"dev1","starts":1792000000,"expires":1792259200,"issued":1792000000}"#);
+        let t = verify_trial_with(&trial, "dev1", &public).unwrap();
+        assert_eq!((t.starts, t.expires), (1792000000, 1792259200));
+        assert!(verify_trial_with(&trial, "dev2", &public).is_err());
+        assert!(verify_trial_with(&signed(&SigningKey::from_bytes(&[8; 32]), r#"{"trial_device":"dev1","starts":1,"expires":2}"#), "dev1", &public).is_err());
+        // Neither kind of certificate is accepted as the other.
+        assert!(verify_with(&trial, "dev1", &public).is_err());
+        assert!(verify_trial_with(&certificate(&signer, "dev1"), "dev1", &public).is_err());
     }
 
     #[test]

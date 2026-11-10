@@ -58,8 +58,10 @@ struct Shared {
     jobs: Mutex<HashMap<String, Arc<Stop>>>,
     /// The launcher is replacing itself and will restart: no new job starts.
     restarting: AtomicBool,
-    /// The active license's key hint; installs and updates need one.
+    /// The active license's key hint; installs and updates need one, or a running trial.
     license: Mutex<Option<String>>,
+    /// When this machine's free trial ends (Unix seconds), if it has had one.
+    trial_until: Mutex<Option<i64>>,
     manifest: Mutex<Manifest>,
     options: Mutex<BackendOptions>,
     checking: AtomicBool,
@@ -128,6 +130,7 @@ impl NativeBackend {
             jobs: Mutex::new(HashMap::new()),
             restarting: AtomicBool::new(false),
             license: Mutex::new(None),
+            trial_until: Mutex::new(None),
             manifest: Mutex::new(Manifest::load(&paths.manifest())),
             options: Mutex::new(BackendOptions::default()),
             checking: AtomicBool::new(false),
@@ -178,14 +181,47 @@ impl NativeBackend {
         self.shared.options.lock().unwrap_or_else(PoisonError::into_inner).clone()
     }
 
-    /// Reads the saved license and tells the UI.
+    /// Reads the saved license and trial and tells the UI.
     fn load_license(&self) {
-        let hint = self.device.as_deref().and_then(|d| crate::license::load(&self.paths, d)).map(|l| l.hint);
+        let device = self.device.as_deref();
+        let hint = device.and_then(|d| crate::license::load(&self.paths, d)).map(|l| l.hint);
+        let trial_until = device.and_then(|d| crate::license::load_trial(&self.paths, d)).map(|t| t.expires);
         *self.shared.license.lock().unwrap_or_else(PoisonError::into_inner) = hint.clone();
-        self.shared.emit(Event::License(match hint {
-            Some(hint) => LicenseStatus::Licensed { hint },
-            None => LicenseStatus::Unlicensed,
-        }));
+        *self.shared.trial_until.lock().unwrap_or_else(PoisonError::into_inner) = trial_until;
+        self.shared.emit(Event::License(license_status(hint, trial_until, crate::now())));
+    }
+
+    fn start_trial(&self) {
+        let (Some(http), Some(device)) = (self.http.clone(), self.device.clone()) else {
+            let why = if self.device.is_none() { "This computer has no readable machine id." } else { "HTTPS isn't available." };
+            self.shared.emit(Event::License(LicenseStatus::Failed(why.into())));
+            return;
+        };
+        self.shared.emit(Event::License(LicenseStatus::StartingTrial));
+        let (shared, paths) = (self.shared.clone(), self.paths.clone());
+        std::thread::spawn(move || {
+            let status = match crate::license::start_trial(&http, &paths, &device) {
+                Ok(t) => {
+                    log::info!("free trial runs until {}", t.expires);
+                    *shared.trial_until.lock().unwrap_or_else(PoisonError::into_inner) = Some(t.expires);
+                    license_status(None, Some(t.expires), crate::now())
+                }
+                Err(e) => {
+                    log::warn!("free trial not started: {e}");
+                    // An ended trial was saved with the answer: keep what we know.
+                    let until = crate::license::load_trial(&paths, &device).map(|t| t.expires);
+                    *shared.trial_until.lock().unwrap_or_else(PoisonError::into_inner) = until;
+                    LicenseStatus::Failed(e)
+                }
+            };
+            shared.emit(Event::License(status));
+        });
+    }
+
+    /// A license, or a trial that hasn't ended.
+    fn may_install(&self) -> bool {
+        self.shared.license.lock().unwrap_or_else(PoisonError::into_inner).is_some()
+            || self.shared.trial_until.lock().unwrap_or_else(PoisonError::into_inner).is_some_and(|until| crate::now() < until)
     }
 
     fn activate(&self, key: String) {
@@ -355,7 +391,7 @@ impl NativeBackend {
     fn start_job(&self, app_id: &str, work: Work) {
         let uninstall = work == Work::Uninstall;
         let Some(app) = CraftApp::by_id(app_id) else { return };
-        if !uninstall && self.shared.license.lock().unwrap_or_else(PoisonError::into_inner).is_none() {
+        if !uninstall && !self.may_install() {
             self.shared.emit(Event::JobFinished { app: app.id.to_string(), result: Err(LICENSE_REQUIRED.into()) });
             return;
         }
@@ -1040,6 +1076,7 @@ impl Backend for NativeBackend {
             Command::UpdateLauncher => self.update_launcher(),
             Command::FetchScreenshots { app } => self.fetch_screenshots(&app),
             Command::Activate { key } => self.activate(key),
+            Command::StartTrial => self.start_trial(),
             Command::Deactivate => {
                 crate::license::remove(&self.paths);
                 self.load_license();
@@ -1085,6 +1122,16 @@ impl Backend for NativeBackend {
     }
 }
 
+/// What the UI shows for a license `hint` and a trial ending at `trial_until`, at `now`.
+fn license_status(hint: Option<String>, trial_until: Option<i64>, now: i64) -> LicenseStatus {
+    match (hint, trial_until) {
+        (Some(hint), _) => LicenseStatus::Licensed { hint },
+        (None, Some(expires)) if now < expires => LicenseStatus::Trial { expires },
+        (None, Some(_)) => LicenseStatus::TrialEnded,
+        (None, None) => LicenseStatus::Unlicensed,
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use std::sync::atomic::AtomicUsize;
@@ -1115,6 +1162,14 @@ mod tests {
         fn save(&self) {}
     }
 
+    #[test]
+    fn a_license_beats_a_trial_and_a_trial_ends_on_time() {
+        assert_eq!(license_status(Some("ABCDE".into()), Some(10), 20), LicenseStatus::Licensed { hint: "ABCDE".into() });
+        assert_eq!(license_status(None, Some(10), 9), LicenseStatus::Trial { expires: 10 });
+        assert_eq!(license_status(None, Some(10), 10), LicenseStatus::TrialEnded);
+        assert_eq!(license_status(None, None, 10), LicenseStatus::Unlicensed);
+    }
+
     fn shared() -> Shared {
         Shared {
             events: Mutex::new(Vec::new()),
@@ -1124,6 +1179,7 @@ mod tests {
             jobs: Mutex::new(HashMap::new()),
             restarting: AtomicBool::new(false),
             license: Mutex::new(Some("TEST1".into())),
+            trial_until: Mutex::new(None),
             manifest: Mutex::new(Manifest::default()),
             options: Mutex::new(BackendOptions::default()),
             checking: AtomicBool::new(false),
