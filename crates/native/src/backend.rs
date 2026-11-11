@@ -47,6 +47,8 @@ const SERIOUS_FEED_FAILURES: u32 = 3;
 const SERIOUS_FEED_OUTAGE: i64 = 60 * 60;
 /// Requests in flight at once during a check.
 const WORKERS: usize = 4;
+/// While kojalytics.com can't renew the license certificate, it is asked again at most this often.
+const RENEW_RETRY: i64 = 60 * 60;
 
 type Waker = Arc<dyn Fn() + Send + Sync>;
 
@@ -62,6 +64,8 @@ struct Shared {
     license: Mutex<Option<String>>,
     /// When this machine's free trial ends (Unix seconds), if it has had one.
     trial_until: Mutex<Option<i64>>,
+    /// When the license certificate was last sent for renewal (Unix seconds).
+    renew_tried: Mutex<Option<i64>>,
     manifest: Mutex<Manifest>,
     options: Mutex<BackendOptions>,
     checking: AtomicBool,
@@ -131,6 +135,7 @@ impl NativeBackend {
             restarting: AtomicBool::new(false),
             license: Mutex::new(None),
             trial_until: Mutex::new(None),
+            renew_tried: Mutex::new(None),
             manifest: Mutex::new(Manifest::load(&paths.manifest())),
             options: Mutex::new(BackendOptions::default()),
             checking: AtomicBool::new(false),
@@ -148,6 +153,7 @@ impl NativeBackend {
         let device = crate::license::device_hash();
         let backend = Self { shared, paths, http, source, platform: native_platform(), self_install: crate::self_update::current(), device };
         backend.load_license();
+        backend.renew_license();
         backend.replay_cache();
         backend.detect_all();
         backend
@@ -218,6 +224,46 @@ impl NativeBackend {
         });
     }
 
+    /// Renews the license certificate at kojalytics.com once it is a day old (at once for one from
+    /// before renewals), retrying hourly while there is no answer. Once the key is deactivated the
+    /// certificate is gone, and with it the license on this computer and in the apps.
+    fn renew_license(&self) {
+        let (Some(http), Some(device)) = (self.http.clone(), self.device.clone()) else { return };
+        let now = crate::now();
+        let Some(saved) = crate::license::saved(&self.paths, &device, &artcraft_launcher_core::license::PUBLIC_KEY) else { return };
+        if !saved.due_for_renewal(now) {
+            return;
+        }
+        {
+            let mut tried = self.shared.renew_tried.lock().unwrap_or_else(PoisonError::into_inner);
+            if tried.is_some_and(|t| now.saturating_sub(t) < RENEW_RETRY) {
+                return;
+            }
+            *tried = Some(now);
+        }
+        let (shared, paths) = (self.shared.clone(), self.paths.clone());
+        std::thread::spawn(move || match crate::license::renew(&http, &paths, &device) {
+            Some(crate::license::Renewal::Renewed(l)) => {
+                log::info!("license …{} renewed until {:?}", l.hint, l.expires);
+                *shared.license.lock().unwrap_or_else(PoisonError::into_inner) = Some(l.hint.clone());
+                shared.emit(Event::License(LicenseStatus::Licensed { hint: l.hint }));
+            }
+            Some(crate::license::Renewal::Revoked(why)) => {
+                log::warn!("license …{} deactivated: {why}", saved.hint);
+                *shared.license.lock().unwrap_or_else(PoisonError::into_inner) = None;
+                shared.emit(Event::License(LicenseStatus::Failed(why)));
+            }
+            Some(crate::license::Renewal::Failed(e)) => {
+                log::warn!("license not renewed: {e}");
+                if saved.expired(crate::now()) {
+                    let why = format!("Your license needs renewing online, but the license server couldn't be reached: {e}");
+                    shared.emit(Event::License(LicenseStatus::Failed(why)));
+                }
+            }
+            None => {}
+        });
+    }
+
     /// A license, or a trial that hasn't ended.
     fn may_install(&self) -> bool {
         self.shared.license.lock().unwrap_or_else(PoisonError::into_inner).is_some()
@@ -285,6 +331,8 @@ impl NativeBackend {
     /// GitHub for anything the feed can't vouch for (apps it doesn't list, entries more than a
     /// day old, or no answer at all), at most once an hour per app unless `force`.
     fn check(&self, force: bool) {
+        // The UI checks every few minutes while the launcher runs: renewal rides along (daily).
+        self.renew_license();
         let (Some(source), Some(http)) = (self.source.clone(), self.http.clone()) else {
             for app in &SUITE {
                 self.shared.emit(Event::Latest {
@@ -1180,6 +1228,7 @@ mod tests {
             restarting: AtomicBool::new(false),
             license: Mutex::new(Some("TEST1".into())),
             trial_until: Mutex::new(None),
+            renew_tried: Mutex::new(None),
             manifest: Mutex::new(Manifest::default()),
             options: Mutex::new(BackendOptions::default()),
             checking: AtomicBool::new(false),
