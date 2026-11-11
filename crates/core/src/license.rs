@@ -5,6 +5,11 @@
 //! signed with Kojalytics' private key. The launcher keeps the certificate and checks it offline
 //! against [`PUBLIC_KEY`] and this machine's device hash.
 //!
+//! A certificate runs out ([`License::expires`], 30 days after it was issued). The launcher renews
+//! it at [`REFRESH_URL`] once a day; once the key is deactivated, kojalytics.com refuses and the
+//! launcher deletes it, so the apps lock. Certificates from before renewals have no end and are
+//! renewed at the next start.
+//!
 //! A free trial works the same way without a key: kojalytics.com signs a [`Trial`] certificate for
 //! this machine that ends three days after the machine's first trial.
 
@@ -23,6 +28,10 @@ pub const PUBLIC_KEY: [u8; 32] = [
 pub const ACTIVATE_URL: &str = "https://www.kojalytics.com/api/license/activate";
 /// Where a machine's free trial starts (or its certificate is fetched again).
 pub const TRIAL_URL: &str = "https://www.kojalytics.com/api/license/trial";
+/// Where a license certificate is renewed.
+pub const REFRESH_URL: &str = "https://www.kojalytics.com/api/license/refresh";
+/// How old a license certificate gets before the launcher renews it (seconds).
+pub const RENEW_AFTER: i64 = 24 * 60 * 60;
 
 /// Crockford base32: no I, L, O or U.
 const ALPHABET: &str = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
@@ -37,6 +46,22 @@ pub struct License {
     pub device: String,
     /// Unix seconds.
     pub issued: i64,
+    /// When the certificate runs out (Unix seconds); `None` on certificates from before renewals.
+    #[serde(default)]
+    pub expires: Option<i64>,
+}
+
+impl License {
+    /// Whether the certificate has run out at `now`.
+    pub fn expired(&self, now: i64) -> bool {
+        self.expires.is_some_and(|expires| now >= expires)
+    }
+
+    /// Whether the launcher should renew it at `now`: a day after it was issued, and straight away
+    /// when it has no end.
+    pub fn due_for_renewal(&self, now: i64) -> bool {
+        self.expires.is_none() || now.saturating_sub(self.issued) >= RENEW_AFTER
+    }
 }
 
 /// What a valid trial certificate says. The machine is named `trial_device`, not `device`, so a
@@ -69,7 +94,8 @@ pub fn verify(certificate: &str, device: &str) -> Result<License, String> {
     verify_with(certificate, device, &PUBLIC_KEY)
 }
 
-fn verify_with(certificate: &str, device: &str, public_key: &[u8; 32]) -> Result<License, String> {
+/// [`verify`] against another public key (the tests' own).
+pub fn verify_with(certificate: &str, device: &str, public_key: &[u8; 32]) -> Result<License, String> {
     let json = signed_payload(certificate, public_key)?;
     let license: License = serde_json::from_slice(&json).map_err(|_| "unreadable license certificate")?;
     if license.device != device {
@@ -157,6 +183,31 @@ mod tests {
         // Neither kind of certificate is accepted as the other.
         assert!(verify_with(&trial, "dev1", &public).is_err());
         assert!(verify_trial_with(&certificate(&signer, "dev1"), "dev1", &public).is_err());
+    }
+
+    #[test]
+    fn a_certificate_runs_out_and_is_renewed_a_day_after_it_was_issued() {
+        let signer = SigningKey::from_bytes(&[7; 32]);
+        let public = signer.verifying_key().to_bytes();
+        let cert = signed(&signer, r#"{"v":1,"license":"abc","hint":"STVWX","device":"dev1","issued":1000000,"expires":3592000}"#);
+        let license = verify_with(&cert, "dev1", &public).unwrap();
+        assert_eq!(license.expires, Some(3592000));
+        assert!(!license.expired(3591999));
+        assert!(license.expired(3592000));
+        assert!(!license.due_for_renewal(1000000 + RENEW_AFTER - 1));
+        assert!(license.due_for_renewal(1000000 + RENEW_AFTER));
+        // A clock behind the server's doesn't ask again and again.
+        assert!(!license.due_for_renewal(999_000));
+    }
+
+    #[test]
+    fn a_certificate_from_before_renewals_never_runs_out_and_is_renewed_at_once() {
+        let signer = SigningKey::from_bytes(&[7; 32]);
+        let public = signer.verifying_key().to_bytes();
+        let license = verify_with(&certificate(&signer, "dev1"), "dev1", &public).unwrap();
+        assert_eq!(license.expires, None);
+        assert!(!license.expired(i64::MAX));
+        assert!(license.due_for_renewal(1792000001));
     }
 
     #[test]
